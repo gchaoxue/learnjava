@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2018-04-09T10:10:15</date>
+  <millis>1523239815892</millis>
+  <sequence>0</sequence>
+  <logger>TimeStampLogger</logger>
+  <level>INFO</level>
+  <class>tutorials.timestamp.Timestamp</class>
+  <method>main</method>
+  <thread>1</thread>
+  <message>This is a log from running</message>
+</record>
+<record>
+  <date>2018-04-09T10:10:15</date>
+  <millis>1523239815924</millis>
+  <sequence>1</sequence>
+  <logger>TimeStampLogger</logger>
+  <level>INFO</level>
+  <class>tutorials.timestamp.Timestamp</class>
+  <method>main</method>
+  <thread>1</thread>
+  <message>Time 3262849060616</message>
+</record>
+<record>
+  <date>2018-04-09T10:10:20</date>
+  <millis>1523239820925</millis>
+  <sequence>2</sequence>
+  <logger>TimeStampLogger</logger>
+  <level>INFO</level>
+  <class>tutorials.timestamp.Timestamp</class>
+  <method>main</method>
+  <thread>1</thread>
+  <message>Time 5000887808</message>
+</record>
+</log>
