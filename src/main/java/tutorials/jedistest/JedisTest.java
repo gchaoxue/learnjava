@@ -7,23 +7,14 @@ import java.io.IOException;
 import java.util.*;
 
 public class JedisTest {
-    private static final int SAVE_REDIS_OPT_NUM = 1000000;
+    private static final int SAVE_REDIS_OPT_NUM = 50000;
     private static final long NANO2MILI = 1000000;
 
     public static void main(String[] args) throws IOException {
         JedisPool pool = new JedisPool(new JedisPoolConfig(), "10.16.18.233", 6379);
         Jedis jedis = null;
-        Jedis jd2 = null;
         try {
             jedis = pool.getResource();
-            jd2 = pool.getResource();
-            /*
-            jedis.set("foo", "bar");
-            String foobar = jedis.get("foo");
-            jedis.zadd("sose", 0, "car");
-            jedis.zadd("sose", 0, "bike");
-            Set<String> sose = jedis.zrange("sose", 0, -1);
-            */
 
             // 生成一个Map
             int opt_num = SAVE_REDIS_OPT_NUM;
@@ -37,35 +28,12 @@ public class JedisTest {
                 }
             }
 
+            System.out.println("map size: " + String.valueOf(opt_num));
 
-            long timeConsume;
-            //将Map 写入redis
-
-            jedis.flushAll();
-            timeConsume = System.nanoTime();
-            //saveToRedisNorm(map, jedis);
-            timeConsume = System.nanoTime() - timeConsume;
-            System.out.println(" [*] time consume none-pipeline: " + String.valueOf(timeConsume/NANO2MILI) + "(ms)");
-
-            jedis.flushAll();
-            timeConsume = System.nanoTime();
-            //saveToRedisPipeline(map, jedis);
-            timeConsume = System.nanoTime() - timeConsume;
-            System.out.println(" [*] time consume pipeline: " + String.valueOf(timeConsume/NANO2MILI) + "(ms)");
-
-            jedis.flushAll();
-            timeConsume = System.nanoTime();
-            saveToRedisTransInPages(map, jedis);
-            timeConsume = System.nanoTime() - timeConsume;
-            System.out.println(" [*] time consume transaction in pages: " + String.valueOf(timeConsume/NANO2MILI) + "(ms)");
-
-            jedis.flushAll();
-            timeConsume = System.nanoTime();
+            saveToRedisNorm(map, jedis);
+            saveToRedisPipeline(map, jedis);
             saveToRedisTranssaction(map, jedis);
-            timeConsume = System.nanoTime() - timeConsume;
-            System.out.println(" [*] time consume transaction: " + String.valueOf(timeConsume/NANO2MILI) + "(ms)");
-
-
+            saveToRedisTransInPages(map, jedis);
 
         } finally {
             if (jedis != null){
@@ -77,12 +45,20 @@ public class JedisTest {
 
     public static void saveToRedisNorm(Map<String, String> map, Jedis jedis) {
         System.out.println(" [x] saving redis in normal way");
+        long timeConsume = System.nanoTime();
+        long nanoTime = 0;
         for (Map.Entry<String, String> e : map.entrySet()) {
+            nanoTime = System.nanoTime();
             jedis.set(e.getKey(), e.getValue());
+            nanoTime = System.nanoTime() - nanoTime;
         }
+        timeConsume = System.nanoTime() - timeConsume;
+        System.out.println(" [x] step consume: " + (nanoTime/1000) + "(μs)");
+        System.out.println(" [x] time consume: " + (timeConsume/1000) + "(μs)");
     }
 
     public static void saveToRedisPipeline(Map<String, String> map, Jedis jedis) throws IOException {
+        long timeConsume = System.nanoTime();
         System.out.println(" [x] saving redis using pipeline");
         Pipeline p = jedis.pipelined();
         for (Map.Entry<String, String> e : map.entrySet()) {
@@ -90,9 +66,12 @@ public class JedisTest {
         }
         p.sync();
         p.close();
+        timeConsume = System.nanoTime() - timeConsume;
+        System.out.println(" [x] time consume: " + (timeConsume/1000) + "(μs)");
     }
 
     public static void saveToRedisTranssaction(Map<String, String> map, Jedis jedis) throws IOException {
+        long timeConsume = System.nanoTime();
         System.out.println(" [x] saving redis using transaction");
         Transaction tx = jedis.multi();
         for (Map.Entry<String, String> e : map.entrySet()) {
@@ -100,9 +79,12 @@ public class JedisTest {
         }
         tx.exec();
         tx.close();
+        timeConsume = System.nanoTime() - timeConsume;
+        System.out.println(" [x] time consume: " + (timeConsume/1000) + "(μs)");
     }
 
     public static void saveToRedisTransInPages(Map<String, String> map, Jedis jedis) throws IOException {
+        long timeConsume = System.nanoTime();
         System.out.println(" [x] saving redis using transaction");
         Transaction tx = jedis.multi();
         int trans_limit = 10000;
@@ -117,6 +99,8 @@ public class JedisTest {
         }
         tx.exec();
         tx.close();
+        timeConsume = System.nanoTime() - timeConsume;
+        System.out.println(" [x] time consume: " + (timeConsume/1000) + "(μs)");
     }
 
 }
