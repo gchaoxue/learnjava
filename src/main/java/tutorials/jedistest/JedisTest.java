@@ -6,10 +6,11 @@ import java.io.IOException;
 import java.util.*;
 
 public class JedisTest {
-    private static final int SAVE_REDIS_OPT_NUM = 50000;
-    private static final long NANO2MILI = 1000000;
 
     public static void main(String[] args) throws IOException {
+        int SAVE_REDIS_OPT_NUM = Integer.valueOf(args[0]);
+        long NANO2MILI = Long.valueOf(args[1]);
+
         JedisPool pool = new JedisPool(new JedisPoolConfig(), "10.16.18.233", 6379);
         Jedis jedis = null;
         try {
