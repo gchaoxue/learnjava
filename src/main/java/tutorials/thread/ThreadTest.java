@@ -15,5 +15,6 @@ public class ThreadTest {
         // 使用Runnable对象实例化一个Thread对象
         Thread runnable_executor = new Thread(wr);
         runnable_executor.run();
+        runnable_executor.interrupt();
     }
 }
