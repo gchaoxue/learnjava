@@ -42,8 +42,34 @@ public class ExceptionTest {
         }
         */
 
-        tryCatchGo();
+//        tryCatchGo();
 
+//        int cnt = 0;
+//        while(true) {
+//            cnt++;
+//            if (cnt == 20) {
+//                throwRuntimeException();
+//            }
+//            System.out.println(cnt);
+//        }
+//
+//        new Thread(()-> {
+//           while(true) {
+//               System.out.println("dass");
+//           }
+//        });
+    }
+
+    public static void throwRuntimeException() {
+        throw new RuntimeException("runtime exception message");
+    }
+
+    public static void ErrorException() throws Error {
+        throw new Error("error exception message");
+    }
+
+    public static void throwableException() throws Throwable{
+        throw new Throwable("throwable exception message");
     }
 
     public static void throwException() throws Exception{
