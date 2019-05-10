@@ -56,8 +56,11 @@ public class DataLoader {
             String line;
             long totalWords = 0;
             while((line = br.readLine()) != null) {
-                data.add(getWords(line));
-                totalWords += data.get(data.size() - 1).size();
+                List<String> words = getWords(line);
+                if (!words.isEmpty()) {
+                    data.add(words);
+                    totalWords += data.get(data.size() - 1).size();
+                }
             }
 
             LOG.info("read file finished: total-lines<{}>, total-words<{}>", data.size(), totalWords);
@@ -71,11 +74,21 @@ public class DataLoader {
         // in case of converting string "apple(banana)" to word "applebanana"
         // you should first replace none-alphabetic char to space
         String[] words = line.replaceAll("[^a-zA-Z ]", " ").toLowerCase().split("\\s+");
+        for (String w : words) {
+
+        }
         return Arrays.asList(words);
     }
 
     public static void main(String[] args) {
 
-
+        String s = "";
+        List<String> words = (new DataLoader()).getWords(s);
+        if (words.isEmpty()) {
+            LOG.info("get empty word list");
+        }
+        for (String w : words) {
+            LOG.info("get word<{}>", w);
+        }
     }
 }
