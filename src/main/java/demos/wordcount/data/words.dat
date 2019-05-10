@@ -4,3 +4,1001 @@ This may particularly be the case in academia, legal proceedings, journalism and
 Word count is commonly used by translators to determine the price for the translation job.
 Word counts may also be used to calculate measures of readability and to measure typing and reading speeds(usually in words per minute).
 When converting character counts to words, a measure of 5 or 6 characters to a word is generally used for English.
+
+
+Search
+Search Website
+Product
+Cloud
+Developers
+Blog
+Docs
+Download
+CONFLUENT PLATFORM
+3 Ways to Prepare for Disaster Recovery in Multi-Datacenter Apache Kafka Deployments
+Yeva ByzekYeva Byzek
+November 26, 2018 Print
+Imagine:
+
+Disaster strikes—catastrophic hardware failure, software failure, power outage, denial of service attack or some other event causes one datacenter with an Apache Kafka® cluster to completely fail. Yet Kafka continues running in another datacenter, and it already has a copy of the data from the original datacenter, replicated to and from the same topic names. Client applications switch from the failed cluster to the running cluster and automatically resume data consumption in the new datacenter based on where it left off in the original datacenter. The business has minimized downtime and data loss resulting from the disaster, and continues to run its mission critical applications.
+
+Ultimately, enabling the business to continue running is what disaster recovery planning is all about, as datacenter downtime and data loss can result in businesses losing revenue or entirely halting operations. To minimize the downtime and data loss resulting from a disaster, enterprises should create business continuity plans and disaster recovery strategies.
+
+There are three actions you should take today for disaster planning:
+
+Design a multi-datacenter solution
+Build a runbook for failover and failback
+Test! Test! Test!
+1. Design a multi-datacenter solution
+A Kafka deployment in a single datacenter provides message durability through intra-cluster data replication. Data replication with producer setting acks=all provides the strongest available guarantees, because it ensures that other brokers in the cluster acknowledge receiving the data before the leader broker responds to the producer.
+
+The single datacenter design provides robust protection against broker failure. If a client application is using a certain broker for connectivity to the cluster, and that broker fails, another bootstrap broker can provide connectivity to the cluster. However, this single Kafka deployment is vulnerable if the entire datacenter fails.
+
+In a multi-datacenter design, instead of a single datacenter with one Apache Kafka deployment, there are two or more datacenters with Kafka deployments geographically dispersed. They can be on prem or in Confluent Cloud. Confluent Replicator synchronizes data between the sites so that in the event of a partial or complete disaster in one datacenter, applications can fail over to the other datacenter.
+
+To help you design your multi-datacenter solution, we’ve released an updated version of the white paper Disaster Recovery for Multi-Datacenter Apache Kafka Deployments. The latest version of the paper walks through the design and configuration of a multi-datacenter deployment, covering designs, centralized schema management and client application development for multi-datacenter.
+
+It also discusses in detail the new Confluent Replicator features in version 5.0, including:
+
+Prevention of cyclic replication of topics: In the context of active-active datacenters with Replicator running in both directions, Replicator can prevent infinite loops. Otherwise, if you don’t use special topic naming patterns, copying topics could result in an infinite loop copying data from cluster-1 to cluster-2, and then copying that same data in cluster-2 back to cluster-1 and then again from cluster-1 to cluster-2.
+Timestamp preservation: The time that is recorded at initial message production in the origin cluster propagates to the destination cluster. This enables streaming applications to act on the original timestamps.
+Consumer offset translation: The committed consumer offsets are replicated to the destination cluster and translated in such a manner that the offset values make sense in that cluster. This allows consumers to switch to the destination cluster and automatically resume consuming messages where they left off.
+Your architecture will vary depending on your business requirements, but you can apply the building blocks from this white paper to strengthen your disaster recovery plan.
+
+Multi-datacenter solution
+
+2. Build a runbook for failover and failback
+When disaster strikes, you have to be prepared with a runbook of specific actions to take. How do you fail over client applications to the new datacenter? How do you enable Confluent Schema Registry to register new schemas? What do you have to do to enable consumers to start resuming data consumption in the new cluster? Most importantly, after the original datacenter recovers, how do you failback?
+
+Disaster Recovery for Multi-Datacenter Apache Kafka Deployments walks through the basic multi-datacenter principles, explaining what to do if one datacenter fails and how to failback when it recovers. You should adapt those principles to your specific deployments.
+
+How manual or automated the failover workflow is depends on the recovery time objective (RTO), which is the point in time after the disaster event when the failover completes. Ideally, it is as soon as possible after the disaster to minimize downtime. The more aggressive the RTO is, the more you want an automated workflow, which depends on the service discovery mechanism and failover logic developed into the applications.
+
+The recovery point objective (RPO) is the last point in time before the disaster event that the application can recover to with known good data. Usually it is as close before the disaster as possible to minimize data loss. Especially if you leverage the features provided in Replicator 5.0, it will immensely simplify the workflow for failover and failback, as well as improve these recovery times.
+
+3. Test! Test! Test!
+Use the building blocks in the updated white paper to configure an environment that is representative of your production environment, then simulate the disaster. Follow the entire workflow: Take down a cluster, fail over applications, make sure they are successfully processing data and then fail back.
+
+Stepping through the entire workflow is important primarily because it ensures that the multi-datacenter design is robust and working for your specific business needs. Every deployment is slightly different, and client applications are written slightly differently to meet their business needs, so you need to make sure that everything is functional. The second reason to do this simulation is it inherently tests your runbook to ensure that the steps are well documented.
+
+To help you with the testing, Confluent provides a Docker setup in a GitHub repository that you can clone. Disclaimer: This is just for testing—do not take this Docker setup into production!
+
+The Docker brings up an active-active multi-datacenter environment leveraging the new Replicator features, such as provenance headers to prevent cyclic replication of topics, timestamp preservation and consumer offset translation.
+
+For testing, adapt the configurations to be more representative of your deployment and run your client applications against it. You may also use the provided sample client application to see how data consumption can resume in the new datacenter based on where it left off in the original datacenter. Then, simulate the failover and failback, test its behavior, test your runbook and verify that it all works.
+
+Simulate the disaster
+
+In summary, a disaster recovery plan often requires multi-datacenter Kafka deployments where datacenters are geographically dispersed. Take these three steps to ensure you are prepared:
+
+Design a multi-datacenter solution
+Build a runbook for failover and failback
+Test! Test! Test!
+You may be considering an active-passive design (one-way data replication between Kafka clusters); active-active design (two-way data replication between Kafka clusters); client applications that read from just their local cluster or both local and remote clusters; service discovery mechanisms to enable automated failovers; geo locality offerings; etc.
+
+The latest version of the white paper Disaster Recovery for Multi-Datacenter Apache Kafka Deployments provides building blocks that you can apply to any of the above.
+
+Did you like this blog post? Share it now
+Subscribe to the Confluent Blog Subscribe
+More Articles Like This
+DC-1 | DC-2
+Yeva Byzek
+Monitoring Data Replication in Multi-Datacenter Apache Kafka Deployments
+Yeva Byzek
+April 10, 2019.
+Enterprises run modern data systems and services across multiple cloud providers, private clouds and on-prem multi-datacenter deployments. Instead of having many point-to-point connections between sites, the Confluent Platform provides an ...
+
+Streaming Applications
+Yeva Byzek
+Getting Your Feet Wet with Stream Processing – Part 2: Testing Your Streaming Application
+Yeva Byzek
+January 15, 2019.
+Part 1 of this blog series introduced a self-paced tutorial for developers who are just getting started with stream processing. The hands-on tutorial introduced the basics of the Kafka Streams ...
+
+Streaming in the Clouds: Where to Start
+Priya Shivakumar
+Streaming in the Clouds: Where to Start
+Priya Shivakumar
+November 20, 2018.
+Only a few years ago, when someone said they had a “cloud-first strategy,” you knew exactly who their new preferred vendor was. These days, however, the story is a lot ...
+
+Leave a Reply
+Your email address will not be published. Required fields are marked *
+
+Name *
+
+Email *
+
+Website
+
+
+Comment *
+Comments
+	Randy says:
+February 21, 2019 at 7:33 pm
+I have two kafka cluster, both have the all topic and data, When one kafka cluster failed, I want redirect to another kafka cluster, but how spark streaming job working correctly with Consumer offset translation. Each task has fixed KafkaRDD input(topic, partition, startOffset, endOffset) , can spark streaming job seamless switch from one kafka cluster to another kafka cluster, and use translated offset without restart the whole spark job ?
+
+Reply
+Yeva Byzek	Yeva Byzek says:
+February 28, 2019 at 11:32 am
+Client applications that were originally connecting to the failed Kafka cluster no longer work. They will need to reinitialize and refresh the metadata for the other Kafka cluster. How manual or automated the failover workflow is depends on whether there is in place a service discovery mechanism and failover logic developed into the applications.
+
+For further discussion, please join us in the Confluent Slack at https://launchpass.com/confluentcommunity . Thank you!
+
+Reply
+Try Confluent Platform
+Download Now
+Product
+Confluent Platform
+KSQL
+Subscription
+Professional Services
+Training
+Customers
+Cloud
+Confluent Cloud
+Support
+Sign Up
+Log In
+Solutions
+Industry Solutions
+Microservices
+Internet of Things
+Financial Services
+Fraud Detection
+Customer 360
+Azure Hybrid Streaming
+Developers
+What is Kafka?
+Resources
+Online Talks
+Meetups
+Kafka Summit
+Docs
+Blog
+About
+Company
+Careers
+Partners
+News
+Events
+Contact
+Copyright © Confluent, Inc. 2014-2019. Privacy Policy | Terms & Conditions Apache, Apache Kafka, Kafka, and associated open source project names are trademarks of the Apache Software Foundation
+Twitter
+Linkedin
+Github
+Slidehsare
+YouTube
+
+
+
+Support-vector machine
+From Wikipedia, the free encyclopedia
+Jump to navigationJump to search
+Machine learning and
+data mining
+Kernel Machine.svg
+Problems[show]
+Supervised learning
+(classification • regression)
+[show]
+Clustering[show]
+Dimensionality reduction[show]
+Structured prediction[show]
+Anomaly detection[show]
+Artificial neural networks[show]
+Reinforcement learning[show]
+Theory[show]
+Machine-learning venues[show]
+Glossary of artificial intelligence[show]
+Related articles[show]
+Portal-puzzle.svg Machine learning portal
+vte
+In machine learning, support-vector machines (SVMs, also support-vector networks[1]) are supervised learning models with associated learning algorithms that analyze data used for classification and regression analysis. Given a set of training examples, each marked as belonging to one or the other of two categories, an SVM training algorithm builds a model that assigns new examples to one category or the other, making it a non-probabilistic binary linear classifier (although methods such as Platt scaling exist to use SVM in a probabilistic classification setting). An SVM model is a representation of the examples as points in space, mapped so that the examples of the separate categories are divided by a clear gap that is as wide as possible. New examples are then mapped into that same space and predicted to belong to a category based on which side of the gap they fall.
+
+In addition to performing linear classification, SVMs can efficiently perform a non-linear classification using what is called the kernel trick, implicitly mapping their inputs into high-dimensional feature spaces.
+
+When data is unlabelled, supervised learning is not possible, and an unsupervised learning approach is required, which attempts to find natural clustering of the data to groups, and then map new data to these formed groups. The support-vector clustering[2] algorithm, created by Hava Siegelmann and Vladimir Vapnik, applies the statistics of support vectors, developed in the support vector machines algorithm, to categorize unlabeled data, and is one of the most widely used clustering algorithms in industrial applications.[citation needed]
+
+
+Contents
+1	Motivation
+2	Definition
+3	Applications
+4	History
+5	Linear SVM
+5.1	Hard-margin
+5.2	Soft-margin
+6	Nonlinear classification
+7	Computing the SVM classifier
+7.1	Primal
+7.2	Dual
+7.3	Kernel trick
+7.4	Modern methods
+7.4.1	Sub-gradient descent
+7.4.2	Coordinate descent
+8	Empirical risk minimization
+8.1	Risk minimization
+8.2	Regularization and stability
+8.3	SVM and the hinge loss
+8.3.1	Target functions
+9	Properties
+9.1	Parameter selection
+9.2	Issues
+10	Extensions
+10.1	Support-vector clustering (SVC)
+10.2	Multiclass SVM
+10.3	Transductive support-vector machines
+10.4	Structured SVM
+10.5	Regression
+10.6	Bayesian SVM
+11	Implementation
+12	See also
+13	References
+14	Bibliography
+15	External links
+Motivation
+
+H1 does not separate the classes. H2 does, but only with a small margin. H3 separates them with the maximal margin.
+Classifying data is a common task in machine learning. Suppose some given data points each belong to one of two classes, and the goal is to decide which class a new data point will be in. In the case of support-vector machines, a data point is viewed as a {\displaystyle p} p-dimensional vector (a list of {\displaystyle p} p numbers), and we want to know whether we can separate such points with a {\displaystyle (p-1)} (p-1)-dimensional hyperplane. This is called a linear classifier. There are many hyperplanes that might classify the data. One reasonable choice as the best hyperplane is the one that represents the largest separation, or margin, between the two classes. So we choose the hyperplane so that the distance from it to the nearest data point on each side is maximized. If such a hyperplane exists, it is known as the maximum-margin hyperplane and the linear classifier it defines is known as a maximum-margin classifier; or equivalently, the perceptron of optimal stability.[citation needed]
+
+Definition
+More formally, a support-vector machine constructs a hyperplane or set of hyperplanes in a high- or infinite-dimensional space, which can be used for classification, regression, or other tasks like outliers detection.[3] Intuitively, a good separation is achieved by the hyperplane that has the largest distance to the nearest training-data point of any class (so-called functional margin), since in general the larger the margin, the lower the generalization error of the classifier.[4]
+
+
+Kernel machine
+Whereas the original problem may be stated in a finite-dimensional space, it often happens that the sets to discriminate are not linearly separable in that space. For this reason, it was proposed[by whom?] that the original finite-dimensional space be mapped into a much higher-dimensional space, presumably making the separation easier in that space. To keep the computational load reasonable, the mappings used by SVM schemes are designed to ensure that dot products of pairs of input data vectors may be computed easily in terms of the variables in the original space, by defining them in terms of a kernel function {\displaystyle k(x,y)} {\displaystyle k(x,y)} selected to suit the problem.[5] The hyperplanes in the higher-dimensional space are defined as the set of points whose dot product with a vector in that space is constant, where such a set of vector is an orthogonal (and thus minimal) set of vectors that defines a hyperplane. The vectors defining the hyperplanes can be chosen to be linear combinations with parameters {\displaystyle \alpha _{i}} \alpha _{i} of images of feature vectors {\displaystyle x_{i}} x_{i} that occur in the data base.[clarification needed] With this choice of a hyperplane, the points {\displaystyle x} x in the feature space that are mapped into the hyperplane are defined by the relation {\displaystyle \textstyle \sum _{i}\alpha _{i}k(x_{i},x)={\text{constant}}.} {\displaystyle \textstyle \sum _{i}\alpha _{i}k(x_{i},x)={\text{constant}}.} Note that if {\displaystyle k(x,y)} {\displaystyle k(x,y)} becomes small as {\displaystyle y} y grows further away from {\displaystyle x} x, each term in the sum measures the degree of closeness of the test point {\displaystyle x} x to the corresponding data base point {\displaystyle x_{i}} x_{i}. In this way, the sum of kernels above can be used to measure the relative nearness of each test point to the data points originating in one or the other of the sets to be discriminated. Note the fact that the set of points {\displaystyle x} x mapped into any hyperplane can be quite convoluted as a result, allowing much more complex discrimination between sets that are not convex at all in the original space.
+
+Applications
+SVMs can be used to solve various real-world problems:
+
+SVMs are helpful in text and hypertext categorization, as their application can significantly reduce the need for labeled training instances in both the standard inductive and transductive settings.[citation needed] Some methods for shallow semantic parsing are based on support vector machines.[6]
+Classification of images can also be performed using SVMs. Experimental results show that SVMs achieve significantly higher search accuracy than traditional query refinement schemes after just three to four rounds of relevance feedback. This is also true for image segmentation systems, including those using a modified version SVM that uses the privileged approach as suggested by Vapnik.[7][8]
+Hand-written characters can be recognized using SVM.[9]
+The SVM algorithm has been widely applied in the biological and other sciences. They have been used to classify proteins with up to 90% of the compounds classified correctly. Permutation tests based on SVM weights have been suggested as a mechanism for interpretation of SVM models.[10][11] Support-vector machine weights have also been used to interpret SVM models in the past.[12] Posthoc interpretation of support-vector machine models in order to identify features used by the model to make predictions is a relatively new area of research with special significance in the biological sciences.
+History
+The original SVM algorithm was invented by Vladimir N. Vapnik and Alexey Ya. Chervonenkis in 1963. In 1992, Bernhard E. Boser, Isabelle M. Guyon and Vladimir N. Vapnik suggested a way to create nonlinear classifiers by applying the kernel trick to maximum-margin hyperplanes.[13] The current standard[according to whom?] incarnation (soft margin) was proposed by Corinna Cortes and Vapnik in 1993 and published in 1995.[1]
+
+Linear SVM
+
+Maximum-margin hyperplane and margins for an SVM trained with samples from two classes. Samples on the margin are called the support vectors.
+We are given a training dataset of {\displaystyle n} n points of the form
+
+{\displaystyle ({\vec {x}}_{1},y_{1}),\ldots ,({\vec {x}}_{n},y_{n}),} {\displaystyle ({\vec {x}}_{1},y_{1}),\ldots ,({\vec {x}}_{n},y_{n}),}
+where the {\displaystyle y_{i}} y_{i} are either 1 or −1, each indicating the class to which the point {\displaystyle {\vec {x}}_{i}} {\vec {x}}_{i} belongs. Each {\displaystyle {\vec {x}}_{i}} {\vec {x}}_{i} is a {\displaystyle p} p-dimensional real vector. We want to find the "maximum-margin hyperplane" that divides the group of points {\displaystyle {\vec {x}}_{i}} {\vec {x}}_{i} for which {\displaystyle y_{i}=1} {\displaystyle y_{i}=1} from the group of points for which {\displaystyle y_{i}=-1} {\displaystyle y_{i}=-1}, which is defined so that the distance between the hyperplane and the nearest point {\displaystyle {\vec {x}}_{i}} {\vec {x}}_{i} from either group is maximized.
+
+Any hyperplane can be written as the set of points {\displaystyle {\vec {x}}} {\vec {x}} satisfying
+
+{\displaystyle {\vec {w}}\cdot {\vec {x}}-b=0,} {\displaystyle {\vec {w}}\cdot {\vec {x}}-b=0,}
+where {\displaystyle {\vec {w}}} {\vec {w}} is the (not necessarily normalized) normal vector to the hyperplane. This is much like Hesse normal form, except that {\displaystyle {\vec {w}}} {\vec {w}} is not necessarily a unit vector. The parameter {\displaystyle {\tfrac {b}{\|{\vec {w}}\|}}} {\tfrac {b}{\|{\vec {w}}\|}} determines the offset of the hyperplane from the origin along the normal vector {\displaystyle {\vec {w}}} {\vec {w}}.
+
+Hard-margin
+If the training data is linearly separable, we can select two parallel hyperplanes that separate the two classes of data, so that the distance between them is as large as possible. The region bounded by these two hyperplanes is called the "margin", and the maximum-margin hyperplane is the hyperplane that lies halfway between them. With a normalized or standardized dataset, these hyperplanes can be described by the equations
+
+{\displaystyle {\vec {w}}\cdot {\vec {x}}-b=1} {\displaystyle {\vec {w}}\cdot {\vec {x}}-b=1} (anything on or above this boundary is of one class, with label 1)
+and
+
+{\displaystyle {\vec {w}}\cdot {\vec {x}}-b=-1} {\displaystyle {\vec {w}}\cdot {\vec {x}}-b=-1} (anything on or below this boundary is of the other class, with label −1).
+Geometrically, the distance between these two hyperplanes is {\displaystyle {\tfrac {2}{\|{\vec {w}}\|}}} {\tfrac {2}{\|{\vec {w}}\|}}[14], so to maximize the distance between the planes we want to minimize {\displaystyle \|{\vec {w}}\|} \|{\vec {w}}\|. The distance is computed using the distance from a point to a plane equation. We also have to prevent data points from falling into the margin, we add the following constraint: for each {\displaystyle i} i either
+
+{\displaystyle {\vec {w}}\cdot {\vec {x}}_{i}-b\geq 1} {\displaystyle {\vec {w}}\cdot {\vec {x}}_{i}-b\geq 1}, if {\displaystyle y_{i}=1} {\displaystyle y_{i}=1},
+or
+
+{\displaystyle {\vec {w}}\cdot {\vec {x}}_{i}-b\leq -1} {\displaystyle {\vec {w}}\cdot {\vec {x}}_{i}-b\leq -1}, if {\displaystyle y_{i}=-1} {\displaystyle y_{i}=-1}.
+These constraints state that each data point must lie on the correct side of the margin.
+
+This can be rewritten as
+
+{\displaystyle y_{i}({\vec {w}}\cdot {\vec {x}}_{i}-b)\geq 1,\quad {\text{ for all }}1\leq i\leq n.\qquad \qquad (1)} {\displaystyle y_{i}({\vec {w}}\cdot {\vec {x}}_{i}-b)\geq 1,\quad {\text{ for all }}1\leq i\leq n.\qquad \qquad (1)}
+We can put this together to get the optimization problem:
+
+"Minimize {\displaystyle \|{\vec {w}}\|} \|{\vec {w}}\| subject to {\displaystyle y_{i}({\vec {w}}\cdot {\vec {x}}_{i}-b)\geq 1} {\displaystyle y_{i}({\vec {w}}\cdot {\vec {x}}_{i}-b)\geq 1} for {\displaystyle i=1,\ldots ,n} i=1,\ldots ,n."
+The {\displaystyle {\vec {w}}} {\vec {w}} and {\displaystyle b} b that solve this problem determine our classifier, {\displaystyle {\vec {x}}\mapsto \operatorname {sgn}({\vec {w}}\cdot {\vec {x}}-b)} {\displaystyle {\vec {x}}\mapsto \operatorname {sgn}({\vec {w}}\cdot {\vec {x}}-b)}.
+
+An important consequence of this geometric description is that the max-margin hyperplane is completely determined by those {\displaystyle {\vec {x}}_{i}} {\vec {x}}_{i} that lie nearest to it. These {\displaystyle {\vec {x}}_{i}} {\vec {x}}_{i} are called support vectors.
+
+Soft-margin
+To extend SVM to cases in which the data are not linearly separable, we introduce the hinge loss function,
+
+{\displaystyle \max \left(0,1-y_{i}({\vec {w}}\cdot {\vec {x}}_{i}-b)\right).} {\displaystyle \max \left(0,1-y_{i}({\vec {w}}\cdot {\vec {x}}_{i}-b)\right).}
+Note that {\displaystyle y_{i}} y_{i} is the i-th target (i.e., in this case, 1 or −1), and {\displaystyle {\vec {w}}\cdot {\vec {x}}_{i}-b} {\displaystyle {\vec {w}}\cdot {\vec {x}}_{i}-b} is the current output.
+
+This function is zero if the constraint in (1) is satisfied, in other words, if {\displaystyle {\vec {x}}_{i}} {\vec {x}}_{i} lies on the correct side of the margin. For data on the wrong side of the margin, the function's value is proportional to the distance from the margin.
+
+We then wish to minimize
+
+{\displaystyle \left[{\frac {1}{n}}\sum _{i=1}^{n}\max \left(0,1-y_{i}({\vec {w}}\cdot {\vec {x}}_{i}-b)\right)\right]+\lambda \lVert {\vec {w}}\rVert ^{2},} {\displaystyle \left[{\frac {1}{n}}\sum _{i=1}^{n}\max \left(0,1-y_{i}({\vec {w}}\cdot {\vec {x}}_{i}-b)\right)\right]+\lambda \lVert {\vec {w}}\rVert ^{2},}
+where the parameter {\displaystyle \lambda } \lambda  determines the trade-off between increasing the margin size and ensuring that the {\displaystyle {\vec {x}}_{i}} {\vec {x}}_{i} lie on the correct side of the margin. Thus, for sufficiently small values of {\displaystyle \lambda } \lambda , the second term in the loss function will become negligible, hence, it will behave similar to the hard-margin SVM, if the input data are linearly classifiable, but will still learn if a classification rule is viable or not.
+
+Nonlinear classification
+
+Kernel machine
+The original maximum-margin hyperplane algorithm proposed by Vapnik in 1963 constructed a linear classifier. However, in 1992, Bernhard E. Boser, Isabelle M. Guyon and Vladimir N. Vapnik suggested a way to create nonlinear classifiers by applying the kernel trick (originally proposed by Aizerman et al.[15]) to maximum-margin hyperplanes.[13] The resulting algorithm is formally similar, except that every dot product is replaced by a nonlinear kernel function. This allows the algorithm to fit the maximum-margin hyperplane in a transformed feature space. The transformation may be nonlinear and the transformed space high-dimensional; although the classifier is a hyperplane in the transformed feature space, it may be nonlinear in the original input space.
+
+It is noteworthy that working in a higher-dimensional feature space increases the generalization error of support-vector machines, although given enough samples the algorithm still performs well.[16]
+
+Some common kernels include:
+
+Polynomial (homogeneous): {\displaystyle k({\vec {x_{i}}},{\vec {x_{j}}})=({\vec {x_{i}}}\cdot {\vec {x_{j}}})^{d}} {\displaystyle k({\vec {x_{i}}},{\vec {x_{j}}})=({\vec {x_{i}}}\cdot {\vec {x_{j}}})^{d}}.
+Polynomial (inhomogeneous): {\displaystyle k({\vec {x_{i}}},{\vec {x_{j}}})=({\vec {x_{i}}}\cdot {\vec {x_{j}}}+1)^{d}} {\displaystyle k({\vec {x_{i}}},{\vec {x_{j}}})=({\vec {x_{i}}}\cdot {\vec {x_{j}}}+1)^{d}}.
+Gaussian radial basis function: {\displaystyle k({\vec {x_{i}}},{\vec {x_{j}}})=\exp(-\gamma \|{\vec {x_{i}}}-{\vec {x_{j}}}\|^{2})} {\displaystyle k({\vec {x_{i}}},{\vec {x_{j}}})=\exp(-\gamma \|{\vec {x_{i}}}-{\vec {x_{j}}}\|^{2})} for {\displaystyle \gamma >0} \gamma >0. Sometimes parametrized using {\displaystyle \gamma =1/(2\sigma ^{2})} {\displaystyle \gamma =1/(2\sigma ^{2})}.
+Hyperbolic tangent: {\displaystyle k({\vec {x_{i}}},{\vec {x_{j}}})=\tanh(\kappa {\vec {x_{i}}}\cdot {\vec {x_{j}}}+c)} {\displaystyle k({\vec {x_{i}}},{\vec {x_{j}}})=\tanh(\kappa {\vec {x_{i}}}\cdot {\vec {x_{j}}}+c)} for some (not every) {\displaystyle \kappa >0} \kappa >0 and {\displaystyle c<0} c < 0.
+The kernel is related to the transform {\displaystyle \varphi ({\vec {x_{i}}})} {\displaystyle \varphi ({\vec {x_{i}}})} by the equation {\displaystyle k({\vec {x_{i}}},{\vec {x_{j}}})=\varphi ({\vec {x_{i}}})\cdot \varphi ({\vec {x_{j}}})} {\displaystyle k({\vec {x_{i}}},{\vec {x_{j}}})=\varphi ({\vec {x_{i}}})\cdot \varphi ({\vec {x_{j}}})}. The value w is also in the transformed space, with {\displaystyle \textstyle {\vec {w}}=\sum _{i}\alpha _{i}y_{i}\varphi ({\vec {x}}_{i})} {\displaystyle \textstyle {\vec {w}}=\sum _{i}\alpha _{i}y_{i}\varphi ({\vec {x}}_{i})}. Dot products with w for classification can again be computed by the kernel trick, i.e. {\displaystyle \textstyle {\vec {w}}\cdot \varphi ({\vec {x}})=\sum _{i}\alpha _{i}y_{i}k({\vec {x}}_{i},{\vec {x}})} {\displaystyle \textstyle {\vec {w}}\cdot \varphi ({\vec {x}})=\sum _{i}\alpha _{i}y_{i}k({\vec {x}}_{i},{\vec {x}})}.
+
+Computing the SVM classifier
+Computing the (soft-margin) SVM classifier amounts to minimizing an expression of the form
+
+{\displaystyle \left[{\frac {1}{n}}\sum _{i=1}^{n}\max \left(0,1-y_{i}(w\cdot x_{i}-b)\right)\right]+\lambda \lVert w\rVert ^{2}.\qquad (2)} {\displaystyle \left[{\frac {1}{n}}\sum _{i=1}^{n}\max \left(0,1-y_{i}(w\cdot x_{i}-b)\right)\right]+\lambda \lVert w\rVert ^{2}.\qquad (2)}
+We focus on the soft-margin classifier since, as noted above, choosing a sufficiently small value for {\displaystyle \lambda } \lambda  yields the hard-margin classifier for linearly classifiable input data. The classical approach, which involves reducing (2) to a quadratic programming problem, is detailed below. Then, more recent approaches such as sub-gradient descent and coordinate descent will be discussed.
+
+Primal
+Minimizing (2) can be rewritten as a constrained optimization problem with a differentiable objective function in the following way.
+
+For each {\displaystyle i\in \{1,\,\ldots ,\,n\}} {\displaystyle i\in \{1,\,\ldots ,\,n\}} we introduce a variable {\displaystyle \zeta _{i}=\max \left(0,1-y_{i}(w\cdot x_{i}-b)\right)} {\displaystyle \zeta _{i}=\max \left(0,1-y_{i}(w\cdot x_{i}-b)\right)}. Note that {\displaystyle \zeta _{i}} {\displaystyle \zeta _{i}} is the smallest nonnegative number satisfying {\displaystyle y_{i}(w\cdot x_{i}-b)\geq 1-\zeta _{i}.} {\displaystyle y_{i}(w\cdot x_{i}-b)\geq 1-\zeta _{i}.}
+
+Thus we can rewrite the optimization problem as follows
+
+{\displaystyle {\text{minimize }}{\frac {1}{n}}\sum _{i=1}^{n}\zeta _{i}+\lambda \|w\|^{2}} {\displaystyle {\text{minimize }}{\frac {1}{n}}\sum _{i=1}^{n}\zeta _{i}+\lambda \|w\|^{2}}
+{\displaystyle {\text{subject to }}y_{i}(w\cdot x_{i}-b)\geq 1-\zeta _{i}\,{\text{ and }}\,\zeta _{i}\geq 0,\,{\text{for all }}i.} {\displaystyle {\text{subject to }}y_{i}(w\cdot x_{i}-b)\geq 1-\zeta _{i}\,{\text{ and }}\,\zeta _{i}\geq 0,\,{\text{for all }}i.}
+This is called the primal problem.
+
+Dual
+By solving for the Lagrangian dual of the above problem, one obtains the simplified problem
+
+{\displaystyle {\text{maximize}}\,\,f(c_{1}\ldots c_{n})=\sum _{i=1}^{n}c_{i}-{\frac {1}{2}}\sum _{i=1}^{n}\sum _{j=1}^{n}y_{i}c_{i}(x_{i}\cdot x_{j})y_{j}c_{j},} {\displaystyle {\text{maximize}}\,\,f(c_{1}\ldots c_{n})=\sum _{i=1}^{n}c_{i}-{\frac {1}{2}}\sum _{i=1}^{n}\sum _{j=1}^{n}y_{i}c_{i}(x_{i}\cdot x_{j})y_{j}c_{j},}
+{\displaystyle {\text{subject to }}\sum _{i=1}^{n}c_{i}y_{i}=0,\,{\text{and }}0\leq c_{i}\leq {\frac {1}{2n\lambda }}\;{\text{for all }}i.} {\displaystyle {\text{subject to }}\sum _{i=1}^{n}c_{i}y_{i}=0,\,{\text{and }}0\leq c_{i}\leq {\frac {1}{2n\lambda }}\;{\text{for all }}i.}
+This is called the dual problem. Since the dual maximization problem is a quadratic function of the {\displaystyle c_{i}}  c_i subject to linear constraints, it is efficiently solvable by quadratic programming algorithms.
+
+Here, the variables {\displaystyle c_{i}}  c_i are defined such that
+
+{\displaystyle {\vec {w}}=\sum _{i=1}^{n}c_{i}y_{i}{\vec {x}}_{i}} {\displaystyle {\vec {w}}=\sum _{i=1}^{n}c_{i}y_{i}{\vec {x}}_{i}}.
+Moreover, {\displaystyle c_{i}=0} {\displaystyle c_{i}=0} exactly when {\displaystyle {\vec {x}}_{i}} {\displaystyle {\vec {x}}_{i}} lies on the correct side of the margin, and {\displaystyle 0<c_{i}<(2n\lambda )^{-1}} {\displaystyle 0<c_{i}<(2n\lambda )^{-1}} when {\displaystyle {\vec {x}}_{i}} {\displaystyle {\vec {x}}_{i}} lies on the margin's boundary. It follows that {\displaystyle {\vec {w}}} {\displaystyle {\vec {w}}} can be written as a linear combination of the support vectors.
+
+The offset, {\displaystyle b}  b, can be recovered by finding an {\displaystyle {\vec {x}}_{i}} {\displaystyle {\vec {x}}_{i}} on the margin's boundary and solving
+
+{\displaystyle y_{i}({\vec {w}}\cdot {\vec {x}}_{i}-b)=1\iff b={\vec {w}}\cdot {\vec {x}}_{i}-y_{i}.} {\displaystyle y_{i}({\vec {w}}\cdot {\vec {x}}_{i}-b)=1\iff b={\vec {w}}\cdot {\vec {x}}_{i}-y_{i}.}
+(Note that {\displaystyle y_{i}^{-1}=y_{i}} {\displaystyle y_{i}^{-1}=y_{i}} since {\displaystyle y_{i}=\pm 1} {\displaystyle y_{i}=\pm 1}.)
+
+Kernel trick
+
+A training example of SVM with kernel given by φ((a, b)) = (a, b, a2 + b2).
+Suppose now that we would like to learn a nonlinear classification rule which corresponds to a linear classification rule for the transformed data points {\displaystyle \varphi ({\vec {x}}_{i}).} {\displaystyle \varphi ({\vec {x}}_{i}).} Moreover, we are given a kernel function {\displaystyle k}  k which satisfies {\displaystyle k({\vec {x}}_{i},{\vec {x}}_{j})=\varphi ({\vec {x}}_{i})\cdot \varphi ({\vec {x}}_{j})} {\displaystyle k({\vec {x}}_{i},{\vec {x}}_{j})=\varphi ({\vec {x}}_{i})\cdot \varphi ({\vec {x}}_{j})}.
+
+We know the classification vector {\displaystyle {\vec {w}}} {\displaystyle {\vec {w}}} in the transformed space satisfies
+
+{\displaystyle {\vec {w}}=\sum _{i=1}^{n}c_{i}y_{i}\varphi ({\vec {x}}_{i}),} {\displaystyle {\vec {w}}=\sum _{i=1}^{n}c_{i}y_{i}\varphi ({\vec {x}}_{i}),}
+where, the {\displaystyle c_{i}} {\displaystyle c_{i}} are obtained by solving the optimization problem
+
+{\displaystyle {\begin{aligned}{\text{maximize}}\,\,f(c_{1}\ldots c_{n})&=\sum _{i=1}^{n}c_{i}-{\frac {1}{2}}\sum _{i=1}^{n}\sum _{j=1}^{n}y_{i}c_{i}(\varphi ({\vec {x}}_{i})\cdot \varphi ({\vec {x}}_{j}))y_{j}c_{j}\\&=\sum _{i=1}^{n}c_{i}-{\frac {1}{2}}\sum _{i=1}^{n}\sum _{j=1}^{n}y_{i}c_{i}k({\vec {x}}_{i},{\vec {x}}_{j})y_{j}c_{j}\\\end{aligned}}} {\displaystyle {\begin{aligned}{\text{maximize}}\,\,f(c_{1}\ldots c_{n})&=\sum _{i=1}^{n}c_{i}-{\frac {1}{2}}\sum _{i=1}^{n}\sum _{j=1}^{n}y_{i}c_{i}(\varphi ({\vec {x}}_{i})\cdot \varphi ({\vec {x}}_{j}))y_{j}c_{j}\\&=\sum _{i=1}^{n}c_{i}-{\frac {1}{2}}\sum _{i=1}^{n}\sum _{j=1}^{n}y_{i}c_{i}k({\vec {x}}_{i},{\vec {x}}_{j})y_{j}c_{j}\\\end{aligned}}}
+{\displaystyle {\text{subject to }}\sum _{i=1}^{n}c_{i}y_{i}=0,\,{\text{and }}0\leq c_{i}\leq {\frac {1}{2n\lambda }}\;{\text{for all }}i.} {\displaystyle {\text{subject to }}\sum _{i=1}^{n}c_{i}y_{i}=0,\,{\text{and }}0\leq c_{i}\leq {\frac {1}{2n\lambda }}\;{\text{for all }}i.}
+The coefficients {\displaystyle c_{i}}  c_i can be solved for using quadratic programming, as before. Again, we can find some index {\displaystyle i} i such that {\displaystyle 0<c_{i}<(2n\lambda )^{-1}} {\displaystyle 0<c_{i}<(2n\lambda )^{-1}}, so that {\displaystyle \varphi ({\vec {x}}_{i})} {\displaystyle \varphi ({\vec {x}}_{i})} lies on the boundary of the margin in the transformed space, and then solve
+
+{\displaystyle {\begin{aligned}b={\vec {w}}\cdot \varphi ({\vec {x}}_{i})-y_{i}&=\left[\sum _{j=1}^{n}c_{j}y_{j}\varphi ({\vec {x}}_{j})\cdot \varphi ({\vec {x}}_{i})\right]-y_{i}\\&=\left[\sum _{j=1}^{n}c_{j}y_{j}k({\vec {x}}_{j},{\vec {x}}_{i})\right]-y_{i}.\end{aligned}}} {\displaystyle {\begin{aligned}b={\vec {w}}\cdot \varphi ({\vec {x}}_{i})-y_{i}&=\left[\sum _{j=1}^{n}c_{j}y_{j}\varphi ({\vec {x}}_{j})\cdot \varphi ({\vec {x}}_{i})\right]-y_{i}\\&=\left[\sum _{j=1}^{n}c_{j}y_{j}k({\vec {x}}_{j},{\vec {x}}_{i})\right]-y_{i}.\end{aligned}}}
+Finally, new points can be classified by computing
+
+{\displaystyle {\vec {z}}\mapsto \operatorname {sgn}({\vec {w}}\cdot \varphi ({\vec {z}})-b)=\operatorname {sgn} \left(\left[\sum _{i=1}^{n}c_{i}y_{i}k({\vec {x}}_{i},{\vec {z}})\right]-b\right).} {\displaystyle {\vec {z}}\mapsto \operatorname {sgn}({\vec {w}}\cdot \varphi ({\vec {z}})-b)=\operatorname {sgn} \left(\left[\sum _{i=1}^{n}c_{i}y_{i}k({\vec {x}}_{i},{\vec {z}})\right]-b\right).}
+Modern methods
+Recent algorithms for finding the SVM classifier include sub-gradient descent and coordinate descent. Both techniques have proven to offer significant advantages over the traditional approach when dealing with large, sparse datasets—sub-gradient methods are especially efficient when there are many training examples, and coordinate descent when the dimension of the feature space is high.
+
+Sub-gradient descent
+Sub-gradient descent algorithms for the SVM work directly with the expression
+
+{\displaystyle f({\vec {w}},b)=\left[{\frac {1}{n}}\sum _{i=1}^{n}\max \left(0,1-y_{i}(w\cdot x_{i}-b)\right)\right]+\lambda \lVert w\rVert ^{2}.} {\displaystyle f({\vec {w}},b)=\left[{\frac {1}{n}}\sum _{i=1}^{n}\max \left(0,1-y_{i}(w\cdot x_{i}-b)\right)\right]+\lambda \lVert w\rVert ^{2}.}
+Note that {\displaystyle f} f is a convex function of {\displaystyle {\vec {w}}} {\vec {w}} and {\displaystyle b} b. As such, traditional gradient descent (or SGD) methods can be adapted, where instead of taking a step in the direction of the functions gradient, a step is taken in the direction of a vector selected from the function's sub-gradient. This approach has the advantage that, for certain implementations, the number of iterations does not scale with {\displaystyle n} n, the number of data points.[17]
+
+Coordinate descent
+Coordinate descent algorithms for the SVM work from the dual problem
+
+{\displaystyle {\text{maximize}}\,\,f(c_{1}\ldots c_{n})=\sum _{i=1}^{n}c_{i}-{\frac {1}{2}}\sum _{i=1}^{n}\sum _{j=1}^{n}y_{i}c_{i}(x_{i}\cdot x_{j})y_{j}c_{j},} {\displaystyle {\text{maximize}}\,\,f(c_{1}\ldots c_{n})=\sum _{i=1}^{n}c_{i}-{\frac {1}{2}}\sum _{i=1}^{n}\sum _{j=1}^{n}y_{i}c_{i}(x_{i}\cdot x_{j})y_{j}c_{j},}
+{\displaystyle {\text{subject to }}\sum _{i=1}^{n}c_{i}y_{i}=0,\,{\text{and }}0\leq c_{i}\leq {\frac {1}{2n\lambda }}\;{\text{for all }}i.} {\displaystyle {\text{subject to }}\sum _{i=1}^{n}c_{i}y_{i}=0,\,{\text{and }}0\leq c_{i}\leq {\frac {1}{2n\lambda }}\;{\text{for all }}i.}
+For each {\displaystyle i\in \{1,\,\ldots ,\,n\}} {\displaystyle i\in \{1,\,\ldots ,\,n\}}, iteratively, the coefficient {\displaystyle c_{i}}  c_i is adjusted in the direction of {\displaystyle \partial f/\partial c_{i}} {\displaystyle \partial f/\partial c_{i}}. Then, the resulting vector of coefficients {\displaystyle (c_{1}',\,\ldots ,\,c_{n}')} {\displaystyle (c_{1}',\,\ldots ,\,c_{n}')} is projected onto the nearest vector of coefficients that satisfies the given constraints. (Typically Euclidean distances are used.) The process is then repeated until a near-optimal vector of coefficients is obtained. The resulting algorithm is extremely fast in practice, although few performance guarantees have been proven.[18]
+
+Empirical risk minimization
+The soft-margin support vector machine described above is an example of an empirical risk minimization (ERM) algorithm for the hinge loss. Seen this way, support vector machines belong to a natural class of algorithms for statistical inference, and many of its unique features are due to the behavior of the hinge loss. This perspective can provide further insight into how and why SVMs work, and allow us to better analyze their statistical properties.
+
+Risk minimization
+In supervised learning, one is given a set of training examples {\displaystyle X_{1}\ldots X_{n}} X_{1}\ldots X_{n} with labels {\displaystyle y_{1}\ldots y_{n}} y_{1}\ldots y_{n}, and wishes to predict {\displaystyle y_{n+1}} y_{n+1} given {\displaystyle X_{n+1}} X_{{n+1}}. To do so one forms a hypothesis, {\displaystyle f} f, such that {\displaystyle f(X_{n+1})} {\displaystyle f(X_{n+1})} is a "good" approximation of {\displaystyle y_{n+1}} y_{n+1}. A "good" approximation is usually defined with the help of a loss function, {\displaystyle \ell (y,z)} \ell (y,z), which characterizes how bad {\displaystyle z} z is as a prediction of {\displaystyle y} y. We would then like to choose a hypothesis that minimizes the expected risk:
+
+{\displaystyle \varepsilon (f)=\mathbb {E} \left[\ell (y_{n+1},f(X_{n+1}))\right].} {\displaystyle \varepsilon (f)=\mathbb {E} \left[\ell (y_{n+1},f(X_{n+1}))\right].}
+In most cases, we don't know the joint distribution of {\displaystyle X_{n+1},\,y_{n+1}} {\displaystyle X_{n+1},\,y_{n+1}} outright. In these cases, a common strategy is to choose the hypothesis that minimizes the empirical risk:
+
+{\displaystyle {\hat {\varepsilon }}(f)={\frac {1}{n}}\sum _{k=1}^{n}\ell (y_{k},f(X_{k})).} {\displaystyle {\hat {\varepsilon }}(f)={\frac {1}{n}}\sum _{k=1}^{n}\ell (y_{k},f(X_{k})).}
+Under certain assumptions about the sequence of random variables {\displaystyle X_{k},\,y_{k}} X_{k},\,y_{k} (for example, that they are generated by a finite Markov process), if the set of hypotheses being considered is small enough, the minimizer of the empirical risk will closely approximate the minimizer of the expected risk as {\displaystyle n} n grows large. This approach is called empirical risk minimization, or ERM.
+
+Regularization and stability
+In order for the minimization problem to have a well-defined solution, we have to place constraints on the set {\displaystyle {\mathcal {H}}} {\mathcal {H}} of hypotheses being considered. If {\displaystyle {\mathcal {H}}} {\mathcal {H}} is a normed space (as is the case for SVM), a particularly effective technique is to consider only those hypotheses {\displaystyle f} f for which {\displaystyle \lVert f\rVert _{\mathcal {H}}<k} \lVert f\rVert _{\mathcal {H}}<k . This is equivalent to imposing a regularization penalty {\displaystyle {\mathcal {R}}(f)=\lambda _{k}\lVert f\rVert _{\mathcal {H}}} {\mathcal {R}}(f)=\lambda _{k}\lVert f\rVert _{\mathcal {H}}, and solving the new optimization problem
+
+{\displaystyle {\hat {f}}=\mathrm {arg} \min _{f\in {\mathcal {H}}}{\hat {\varepsilon }}(f)+{\mathcal {R}}(f).} {\displaystyle {\hat {f}}=\mathrm {arg} \min _{f\in {\mathcal {H}}}{\hat {\varepsilon }}(f)+{\mathcal {R}}(f).}
+This approach is called Tikhonov regularization.
+
+More generally, {\displaystyle {\mathcal {R}}(f)} {\mathcal {R}}(f) can be some measure of the complexity of the hypothesis {\displaystyle f} f, so that simpler hypotheses are preferred.
+
+SVM and the hinge loss
+Recall that the (soft-margin) SVM classifier {\displaystyle {\hat {w}},b:x\mapsto \operatorname {sgn}({\hat {w}}\cdot x-b)} {\displaystyle {\hat {w}},b:x\mapsto \operatorname {sgn}({\hat {w}}\cdot x-b)} is chosen to minimize the following expression:
+
+{\displaystyle \left[{\frac {1}{n}}\sum _{i=1}^{n}\max \left(0,1-y_{i}(w\cdot x_{i}-b)\right)\right]+\lambda \lVert w\rVert ^{2}.} {\displaystyle \left[{\frac {1}{n}}\sum _{i=1}^{n}\max \left(0,1-y_{i}(w\cdot x_{i}-b)\right)\right]+\lambda \lVert w\rVert ^{2}.}
+In light of the above discussion, we see that the SVM technique is equivalent to empirical risk minimization with Tikhonov regularization, where in this case the loss function is the hinge loss
+
+{\displaystyle \ell (y,z)=\max \left(0,1-yz\right).} \ell (y,z)=\max \left(0,1-yz\right).
+From this perspective, SVM is closely related to other fundamental classification algorithms such as regularized least-squares and logistic regression. The difference between the three lies in the choice of loss function: regularized least-squares amounts to empirical risk minimization with the square-loss, {\displaystyle \ell _{sq}(y,z)=(y-z)^{2}} \ell _{sq}(y,z)=(y-z)^{2}; logistic regression employs the log-loss,
+
+{\displaystyle \ell _{\log }(y,z)=\ln(1+e^{-yz}).} {\displaystyle \ell _{\log }(y,z)=\ln(1+e^{-yz}).}
+Target functions
+The difference between the hinge loss and these other loss functions is best stated in terms of target functions - the function that minimizes expected risk for a given pair of random variables {\displaystyle X,\,y} {\displaystyle X,\,y}.
+
+In particular, let {\displaystyle y_{x}} y_{x} denote {\displaystyle y} y conditional on the event that {\displaystyle X=x} X=x. In the classification setting, we have:
+
+{\displaystyle y_{x}={\begin{cases}1&{\text{with probability }}p_{x}\\-1&{\text{with probability }}1-p_{x}\end{cases}}} y_{x}={\begin{cases}1&{\text{with probability }}p_{x}\\-1&{\text{with probability }}1-p_{x}\end{cases}}
+The optimal classifier is therefore:
+
+{\displaystyle f^{*}(x)={\begin{cases}1&{\text{if }}p_{x}\geq 1/2\\-1&{\text{otherwise}}\end{cases}}} f^{*}(x)={\begin{cases}1&{\text{if }}p_{x}\geq 1/2\\-1&{\text{otherwise}}\end{cases}}
+For the square-loss, the target function is the conditional expectation function, {\displaystyle f_{sq}(x)=\mathbb {E} \left[y_{x}\right]} f_{sq}(x)=\mathbb {E} \left[y_{x}\right]; For the logistic loss, it's the logit function, {\displaystyle f_{\log }(x)=\ln \left(p_{x}/({1-p_{x}})\right)} {\displaystyle f_{\log }(x)=\ln \left(p_{x}/({1-p_{x}})\right)}. While both of these target functions yield the correct classifier, as {\displaystyle \operatorname {sgn}(f_{sq})=\operatorname {sgn}(f_{\log })=f^{*}} {\displaystyle \operatorname {sgn}(f_{sq})=\operatorname {sgn}(f_{\log })=f^{*}}, they give us more information than we need. In fact, they give us enough information to completely describe the distribution of {\displaystyle y_{x}} y_{x}.
+
+On the other hand, one can check that the target function for the hinge loss is exactly {\displaystyle f^{*}} f^{*}. Thus, in a sufficiently rich hypothesis space—or equivalently, for an appropriately chosen kernel—the SVM classifier will converge to the simplest function (in terms of {\displaystyle {\mathcal {R}}} {\mathcal {R}}) that correctly classifies the data. This extends the geometric interpretation of SVM—for linear classification, the empirical risk is minimized by any function whose margins lie between the support vectors, and the simplest of these is the max-margin classifier.[19]
+
+Properties
+SVMs belong to a family of generalized linear classifiers and can be interpreted as an extension of the perceptron. They can also be considered a special case of Tikhonov regularization. A special property is that they simultaneously minimize the empirical classification error and maximize the geometric margin; hence they are also known as maximum margin classifiers.
+
+A comparison of the SVM to other classifiers has been made by Meyer, Leisch and Hornik.[20]
+
+Parameter selection
+The effectiveness of SVM depends on the selection of kernel, the kernel's parameters, and soft margin parameter C. A common choice is a Gaussian kernel, which has a single parameter {\displaystyle \gamma } \gamma . The best combination of C and {\displaystyle \gamma } \gamma  is often selected by a grid search with exponentially growing sequences of C and {\displaystyle \gamma } \gamma , for example, {\displaystyle C\in \{2^{-5},2^{-3},\dots ,2^{13},2^{15}\}} C\in \{2^{-5},2^{-3},\dots ,2^{13},2^{15}\}; {\displaystyle \gamma \in \{2^{-15},2^{-13},\dots ,2^{1},2^{3}\}} \gamma \in \{2^{-15},2^{-13},\dots ,2^{1},2^{3}\}. Typically, each combination of parameter choices is checked using cross validation, and the parameters with best cross-validation accuracy are picked. Alternatively, recent work in Bayesian optimization can be used to select C and {\displaystyle \gamma } \gamma  , often requiring the evaluation of far fewer parameter combinations than grid search. The final model, which is used for testing and for classifying new data, is then trained on the whole training set using the selected parameters.[21]
+
+Issues
+Potential drawbacks of the SVM include the following aspects:
+
+Requires full labeling of input data
+Uncalibrated class membership probabilities -- SVM stems from Vapnik's theory which avoids estimating probabilities on finite data
+The SVM is only directly applicable for two-class tasks. Therefore, algorithms that reduce the multi-class task to several binary problems have to be applied; see the multi-class SVM section.
+Parameters of a solved model are difficult to interpret.
+Extensions
+Support-vector clustering (SVC)
+SVC is a similar method that also builds on kernel functions but is appropriate for unsupervised learning. It is considered a fundamental method in data science.[citation needed]
+
+Multiclass SVM
+Multiclass SVM aims to assign labels to instances by using support-vector machines, where the labels are drawn from a finite set of several elements.
+
+The dominant approach for doing so is to reduce the single multiclass problem into multiple binary classification problems.[22] Common methods for such reduction include:[22][23]
+
+Building binary classifiers that distinguish between one of the labels and the rest (one-versus-all) or between every pair of classes (one-versus-one). Classification of new instances for the one-versus-all case is done by a winner-takes-all strategy, in which the classifier with the highest-output function assigns the class (it is important that the output functions be calibrated to produce comparable scores). For the one-versus-one approach, classification is done by a max-wins voting strategy, in which every classifier assigns the instance to one of the two classes, then the vote for the assigned class is increased by one vote, and finally the class with the most votes determines the instance classification.
+Directed acyclic graph SVM (DAGSVM)[24]
+Error-correcting output codes[25]
+Crammer and Singer proposed a multiclass SVM method which casts the multiclass classification problem into a single optimization problem, rather than decomposing it into multiple binary classification problems.[26] See also Lee, Lin and Wahba.[27][28]
+
+Transductive support-vector machines
+Transductive support-vector machines extend SVMs in that they could also treat partially labeled data in semi-supervised learning by following the principles of transduction. Here, in addition to the training set {\displaystyle {\mathcal {D}}} {\mathcal {D}}, the learner is also given a set
+
+{\displaystyle {\mathcal {D}}^{\star }=\{{\vec {x}}_{i}^{\star }\mid {\vec {x}}_{i}^{\star }\in \mathbb {R} ^{p}\}_{i=1}^{k}} {\displaystyle {\mathcal {D}}^{\star }=\{{\vec {x}}_{i}^{\star }\mid {\vec {x}}_{i}^{\star }\in \mathbb {R} ^{p}\}_{i=1}^{k}}
+of test examples to be classified. Formally, a transductive support-vector machine is defined by the following primal optimization problem:[29]
+
+Minimize (in {\displaystyle {{\vec {w}},b,{\vec {y^{\star }}}}} {\displaystyle {{\vec {w}},b,{\vec {y^{\star }}}}})
+
+{\displaystyle {\frac {1}{2}}\|{\vec {w}}\|^{2}} {\displaystyle {\frac {1}{2}}\|{\vec {w}}\|^{2}}
+subject to (for any {\displaystyle i=1,\dots ,n} i=1,\dots ,n and any {\displaystyle j=1,\dots ,k} j=1,\dots ,k)
+
+{\displaystyle y_{i}({\vec {w}}\cdot {\vec {x_{i}}}-b)\geq 1,} {\displaystyle y_{i}({\vec {w}}\cdot {\vec {x_{i}}}-b)\geq 1,}
+{\displaystyle y_{j}^{\star }({\vec {w}}\cdot {\vec {x_{j}^{\star }}}-b)\geq 1,} {\displaystyle y_{j}^{\star }({\vec {w}}\cdot {\vec {x_{j}^{\star }}}-b)\geq 1,}
+and
+
+{\displaystyle y_{j}^{\star }\in \{-1,1\}.} {\displaystyle y_{j}^{\star }\in \{-1,1\}.}
+Transductive support-vector machines were introduced by Vladimir N. Vapnik in 1998.
+
+Structured SVM
+SVMs have been generalized to structured SVMs, where the label space is structured and of possibly infinite size.
+
+Regression
+
+Support-vector regression (prediction) with different thresholds ε. As ε increases, the prediction becomes less sensitive to errors.
+A version of SVM for regression was proposed in 1996 by Vladimir N. Vapnik, Harris Drucker, Christopher J. C. Burges, Linda Kaufman and Alexander J. Smola.[30] This method is called support-vector regression (SVR). The model produced by support-vector classification (as described above) depends only on a subset of the training data, because the cost function for building the model does not care about training points that lie beyond the margin. Analogously, the model produced by SVR depends only on a subset of the training data, because the cost function for building the model ignores any training data close to the model prediction. Another SVM version known as least-squares support-vector machine (LS-SVM) has been proposed by Suykens and Vandewalle.[31]
+
+Training the original SVR means solving[32]
+
+minimize {\displaystyle {\frac {1}{2}}\|w\|^{2}} {\frac {1}{2}}\|w\|^{2}
+subject to {\displaystyle {\begin{cases}y_{i}-\langle w,x_{i}\rangle -b\leq \varepsilon ,\\\langle w,x_{i}\rangle +b-y_{i}\leq \varepsilon ,\end{cases}}} {\displaystyle {\begin{cases}y_{i}-\langle w,x_{i}\rangle -b\leq \varepsilon ,\\\langle w,x_{i}\rangle +b-y_{i}\leq \varepsilon ,\end{cases}}}
+where {\displaystyle x_{i}} x_{i} is a training sample with target value {\displaystyle y_{i}} y_{i}. The inner product plus intercept {\displaystyle \langle w,x_{i}\rangle +b} \langle w,x_{i}\rangle +b is the prediction for that sample, and {\displaystyle \varepsilon } \varepsilon  is a free parameter that serves as a threshold: all predictions have to be within an {\displaystyle \varepsilon } \varepsilon  range of the true predictions. Slack variables are usually added into the above to allow for errors and to allow approximation in the case the above problem is infeasible.
+
+Bayesian SVM
+In 2011 it was shown by Polson and Scott that the SVM admits a Bayesian interpretation through the technique of data augmentation.[33] In this approach the SVM is viewed as a graphical model (where the parameters are connected via probability distributions). This extended view allows the application of Bayesian techniques to SVMs, such as flexible feature modeling, automatic hyperparameter tuning, and predictive uncertainty quantification. Recently, a scalable version of the Bayesian SVM was developed by Wenzel et al. enabling the application of Bayesian SVMs to big data.[34]
+
+Implementation
+The parameters of the maximum-margin hyperplane are derived by solving the optimization. There exist several specialized algorithms for quickly solving the quadratic programming (QP) problem that arises from SVMs, mostly relying on heuristics for breaking the problem down into smaller, more manageable chunks.
+
+Another approach is to use an interior-point method that uses Newton-like iterations to find a solution of the Karush–Kuhn–Tucker conditions of the primal and dual problems.[35] Instead of solving a sequence of broken-down problems, this approach directly solves the problem altogether. To avoid solving a linear system involving the large kernel matrix, a low-rank approximation to the matrix is often used in the kernel trick.
+
+Another common method is Platt's sequential minimal optimization (SMO) algorithm, which breaks the problem down into 2-dimensional sub-problems that are solved analytically, eliminating the need for a numerical optimization algorithm and matrix storage. This algorithm is conceptually simple, easy to implement, generally faster, and has better scaling properties for difficult SVM problems.[36]
+
+The special case of linear support-vector machines can be solved more efficiently by the same kind of algorithms used to optimize its close cousin, logistic regression; this class of algorithms includes sub-gradient descent (e.g., PEGASOS[37]) and coordinate descent (e.g., LIBLINEAR[38]). LIBLINEAR has some attractive training-time properties. Each convergence iteration takes time linear in the time taken to read the train data, and the iterations also have a Q-linear convergence property, making the algorithm extremely fast.
+
+The general kernel SVMs can also be solved more efficiently using sub-gradient descent (e.g. P-packSVM[39]), especially when parallelization is allowed.
+
+Kernel SVMs are available in many machine-learning toolkits, including LIBSVM, MATLAB, SAS, SVMlight, kernlab, scikit-learn, Shogun, Weka, Shark, JKernelMachines, OpenCV and others.
+
+See also
+In situ adaptive tabulation
+Kernel machines
+Fisher kernel
+Platt scaling
+Polynomial kernel
+Predictive analytics
+Regularization perspectives on support-vector machines
+Relevance vector machine, a probabilistic sparse-kernel model identical in functional form to SVM
+Sequential minimal optimization
+Space mapping
+Winnow (algorithm)
+References
+ Cortes, Corinna; Vapnik, Vladimir N. (1995). "Support-vector networks". Machine Learning. 20 (3): 273–297. CiteSeerX 10.1.1.15.9362. doi:10.1007/BF00994018.
+ Ben-Hur, Asa; Horn, David; Siegelmann, Hava; and Vapnik, Vladimir N.; "Support vector clustering"; (2001); Journal of Machine Learning Research, 2: 125–137.
+ "1.4. Support Vector Machines — scikit-learn 0.20.2 documentation". Archived from the original on 2017-11-08. Retrieved 2017-11-08.
+ Trevor Hastie, Robert Tibshirani, Jerome Friedman. "The elements of Statistical Learning", p. 134.
+ Press, William H.; Teukolsky, Saul A.; Vetterling, William T.; Flannery, Brian P. (2007). "Section 16.5. Support Vector Machines". Numerical Recipes: The Art of Scientific Computing (3rd ed.). New York: Cambridge University Press. ISBN 978-0-521-88068-8. Archived from the original on 2011-08-11.
+ Pradhan, Sameer S., et al. "Shallow semantic parsing using support vector machines." Proceedings of the Human Language Technology Conference of the North American Chapter of the Association for Computational Linguistics: HLT-NAACL 2004. 2004.
+ Vapnik, Vladimir N.: Invited Speaker. IPMU Information Processing and Management 2014).
+ Barghout, Lauren. "Spatial-Taxon Information Granules as Used in Iterative Fuzzy-Decision-Making for Image Segmentation". Granular Computing and Decision-Making. Springer International Publishing, 2015. 285–318.
+ DeCoste, Dennis (2002). "Training Invariant Support Vector Machines" (PDF). Machine Learning. 46: 161–190. doi:10.1023/A:1012454411458.
+ Gaonkar, Bilwaj; Davatzikos, Christos; "Analytic estimation of statistical significance maps for support vector machine based multi-variate image analysis and classification".
+ Cuingnet, Rémi; Rosso, Charlotte; Chupin, Marie; Lehéricy, Stéphane; Dormont, Didier; Benali, Habib; Samson, Yves; and Colliot, Olivier; "Spatial regularization of SVM for the detection of diffusion alterations associated with stroke outcome", Medical Image Analysis, 2011, 15 (5): 729–737.
+ Statnikov, Alexander; Hardin, Douglas; & Aliferis, Constantin; (2006); "Using SVM weight-based methods to identify causally relevant and non-causally relevant variables", Sign, 1, 4.
+ Boser, Bernhard E.; Guyon, Isabelle M.; Vapnik, Vladimir N. (1992). "A training algorithm for optimal margin classifiers". Proceedings of the fifth annual workshop on Computational learning theory – COLT '92. p. 144. CiteSeerX 10.1.1.21.3818. doi:10.1145/130385.130401. ISBN 978-0897914970.
+ "Why does the SVM margin is {\displaystyle {\frac {2}{\|\mathbf {w} \|}}} {\displaystyle {\frac {2}{\|\mathbf {w} \|}}}". Mathematics Stack Exchange.
+ Aizerman, Mark A.; Braverman, Emmanuel M. & Rozonoer, Lev I. (1964). "Theoretical foundations of the potential function method in pattern recognition learning". Automation and Remote Control. 25: 821–837.
+ Jin, Chi; Wang, Liwei (2012). Dimensionality dependent PAC-Bayes margin bound. Advances in Neural Information Processing Systems. Archived from the original on 2015-04-02.
+ Shalev-Shwartz, Shai; Singer, Yoram; Srebro, Nathan; Cotter, Andrew (2010-10-16). "Pegasos: primal estimated sub-gradient solver for SVM". Mathematical Programming. 127 (1): 3–30. CiteSeerX 10.1.1.161.9629. doi:10.1007/s10107-010-0420-4. ISSN 0025-5610.
+ Hsieh, Cho-Jui; Chang, Kai-Wei; Lin, Chih-Jen; Keerthi, S. Sathiya; Sundararajan, S. (2008-01-01). A Dual Coordinate Descent Method for Large-scale Linear SVM. Proceedings of the 25th International Conference on Machine Learning. ICML '08. New York, NY, USA: ACM. pp. 408–415. CiteSeerX 10.1.1.149.5594. doi:10.1145/1390156.1390208. ISBN 978-1-60558-205-4.
+ Rosasco, Lorenzo; De Vito, Ernesto; Caponnetto, Andrea; Piana, Michele; Verri, Alessandro (2004-05-01). "Are Loss Functions All the Same?". Neural Computation. 16 (5): 1063–1076. CiteSeerX 10.1.1.109.6786. doi:10.1162/089976604773135104. ISSN 0899-7667. PMID 15070510.
+ Meyer, David; Leisch, Friedrich; Hornik, Kurt (2003). "The support vector machine under test". Neurocomputing. 55 (1–2): 169–186. doi:10.1016/S0925-2312(03)00431-4.
+ Hsu, Chih-Wei; Chang, Chih-Chung & Lin, Chih-Jen (2003). A Practical Guide to Support Vector Classification (PDF) (Technical report). Department of Computer Science and Information Engineering, National Taiwan University. Archived (PDF) from the original on 2013-06-25.
+ Duan, Kai-Bo; Keerthi, S. Sathiya (2005). "Which Is the Best Multiclass SVM Method? An Empirical Study". Multiple Classifier Systems. LNCS. 3541. pp. 278–285. CiteSeerX 10.1.1.110.6789. doi:10.1007/11494683_28. ISBN 978-3-540-26306-7.
+ Hsu, Chih-Wei & Lin, Chih-Jen (2002). "A Comparison of Methods for Multiclass Support Vector Machines" (PDF). IEEE Transactions on Neural Networks.
+ Platt, John; Cristianini, Nello; Shawe-Taylor, John (2000). "Large margin DAGs for multiclass classification" (PDF). In Solla, Sara A.; Leen, Todd K.; and Müller, Klaus-Robert; eds. (eds.). Advances in Neural Information Processing Systems. MIT Press. pp. 547–553. Archived (PDF) from the original on 2012-06-16.
+ Dietterich, Thomas G.; Bakiri, Ghulum (1995). "Solving Multiclass Learning Problems via Error-Correcting Output Codes" (PDF). Journal of Artificial Intelligence Research. 2: 263–286. arXiv:cs/9501101. Bibcode:1995cs........1101D. doi:10.1613/jair.105. Archived (PDF) from the original on 2013-05-09.
+ Crammer, Koby & Singer, Yoram (2001). "On the Algorithmic Implementation of Multiclass Kernel-based Vector Machines" (PDF). Journal of Machine Learning Research. 2: 265–292. Archived (PDF) from the original on 2015-08-29.
+ Lee, Yoonkyung; Lin, Yi & Wahba, Grace (2001). "Multicategory Support Vector Machines" (PDF). Computing Science and Statistics. 33. Archived (PDF) from the original on 2013-06-17.
+ Lee, Yoonkyung; Lin, Yi; Wahba, Grace (2004). "Multicategory Support Vector Machines". Journal of the American Statistical Association. 99 (465): 67. CiteSeerX 10.1.1.22.1879. doi:10.1198/016214504000000098.
+ Joachims, Thorsten; "Transductive Inference for Text Classification using Support Vector Machines", Proceedings of the 1999 International Conference on Machine Learning (ICML 1999), pp. 200–209.
+ Drucker, Harris; Burges, Christopher J. C.; Kaufman, Linda; Smola, Alexander J.; and Vapnik, Vladimir N. (1997); "Support Vector Regression Machines", in Advances in Neural Information Processing Systems 9, NIPS 1996, 155–161, MIT Press.
+ Suykens, Johan A. K.; Vandewalle, Joos P. L.; "Least squares support vector machine classifiers", Neural Processing Letters, vol. 9, no. 3, Jun. 1999, pp. 293–300.
+ Smola, Alex J.; Schölkopf, Bernhard (2004). "A tutorial on support vector regression" (PDF). Statistics and Computing. 14 (3): 199–222. CiteSeerX 10.1.1.41.1452. doi:10.1023/B:STCO.0000035301.49549.88. Archived (PDF) from the original on 2012-01-31.
+ Polson, Nicholas G.; Scott, Steven L. (2011). "Data Augmentation for Support Vector Machines". Bayesian Analysis. 6 (1): 1–23. doi:10.1214/11-BA601.
+ Wenzel, Florian; Galy-Fajou, Theo; Deutsch, Matthäus; Kloft, Marius (2017). "Bayesian Nonlinear Support Vector Machines for Big Data". Machine Learning and Knowledge Discovery in Databases (ECML PKDD). Lecture Notes in Computer Science. 10534: 307–322. arXiv:1707.05532. Bibcode:2017arXiv170705532W. doi:10.1007/978-3-319-71249-9_19. ISBN 978-3-319-71248-2.
+ Ferris, Michael C.; Munson, Todd S. (2002). "Interior-Point Methods for Massive Support Vector Machines" (PDF). SIAM Journal on Optimization. 13 (3): 783. CiteSeerX 10.1.1.216.6893. doi:10.1137/S1052623400374379. Archived (PDF) from the original on 2008-12-04.
+ Platt, John C. (1998). Sequential Minimal Optimization: A Fast Algorithm for Training Support Vector Machines (PDF). NIPS. Archived (PDF) from the original on 2015-07-02.
+ Shalev-Shwartz, Shai; Singer, Yoram; Srebro, Nathan (2007). Pegasos: Primal Estimated sub-GrAdient SOlver for SVM (PDF). ICML. Archived (PDF) from the original on 2013-12-15.
+ Fan, Rong-En; Chang, Kai-Wei; Hsieh, Cho-Jui; Wang, Xiang-Rui; Lin, Chih-Jen (2008). "LIBLINEAR: A library for large linear classification" (PDF). Journal of Machine Learning Research. 9: 1871–1874.
+ Allen Zhu, Zeyuan; Chen, Weizhu; Wang, Gang; Zhu, Chenguang; Chen, Zheng (2009). P-packSVM: Parallel Primal grAdient desCent Kernel SVM (PDF). ICDM. Archived (PDF) from the original on 2014-04-07.
+Bibliography
+Theodoridis, Sergios; and Koutroumbas, Konstantinos; Pattern Recognition, 4th Edition, Academic Press, 2009, ISBN 978-1-59749-272-0
+Cristianini, Nello; and Shawe-Taylor, John; An Introduction to Support Vector Machines and other kernel-based learning methods, Cambridge University Press, 2000. ISBN 0-521-78019-5 (SVM Book)
+Huang, Te-Ming; Kecman, Vojislav; and Kopriva, Ivica; (2006); "Kernel Based Algorithms for Mining Huge Data Sets", in Supervised, Semi-supervised, and Unsupervised Learning, Springer-Verlag, Berlin, Heidelberg, 260 pp. 96 illus., Hardcover, ISBN 3-540-31681-7
+Kecman, Vojislav; Learning and Soft Computing — Support Vector Machines, Neural Networks, Fuzzy Logic Systems, The MIT Press, Cambridge, MA, 2001
+Schölkopf, Bernhard; and Smola, Alexander J.; Learning with Kernels, MIT Press, Cambridge, MA, 2002. ISBN 0-262-19475-9
+Schölkopf, Bernhard; Burges, Christopher J. C.; and Smola, Alexander J. (editors); Advances in Kernel Methods: Support Vector Learning, MIT Press, Cambridge, MA, 1999. ISBN 0-262-19416-3
+Shawe-Taylor, John; and Cristianini, Nello; Kernel Methods for Pattern Analysis, Cambridge University Press, 2004. ISBN 0-521-81397-2 (Kernel Methods Book)
+Steinwart, Ingo; and Christmann, Andreas; Support Vector Machines, Springer-Verlag, New York, 2008. ISBN 978-0-387-77241-7 (SVM Book)
+Tan, Peter Jing; and Dowe, David L. (2004); MML Inference of Oblique Decision Trees, Lecture Notes in Artificial Intelligence (LNAI) 3339, Springer-Verlag, pp. 1082–1088 (This paper uses minimum message length (MML) and actually incorporates probabilistic support vector machines in the leaves of decision trees)
+Vapnik, Vladimir N.; The Nature of Statistical Learning Theory, Springer-Verlag, 1995. ISBN 0-387-98780-0
+Vapnik, Vladimir N.; and Kotz, Samuel; Estimation of Dependences Based on Empirical Data, Springer, 2006. ISBN 0-387-30865-2 (this is a reprint of Vapnik's early book describing philosophy behind SVM approach; the 2006 Appendix describes recent developments)
+Fradkin, Dmitriy; and Muchnik, Ilya; "Support Vector Machines for Classification" in Abello, J.; and Carmode, G. (Eds); Discrete Methods in Epidemiology, DIMACS Series in Discrete Mathematics and Theoretical Computer Science, volume 70, pp. 13–20, 2006 (Succinctly describes theoretical ideas behind SVM)
+Bennett, Kristin P.; and Campbell, Colin; "Support Vector Machines: Hype or Hallelujah?", SIGKDD Explorations, 2, 2, 2000, 1–13 (Excellent introduction to SVMs with helpful figures)
+Ivanciuc, Ovidiu; "Applications of Support Vector Machines in Chemistry", in Reviews in Computational Chemistry, Volume 23, 2007, pp. 291–400
+Catanzaro, Bryan; Sundaram, Narayanan; and Keutzer, Kurt; "Fast Support Vector Machine Training and Classification on Graphics Processors", in International Conference on Machine Learning, 2008
+Campbell, Colin; and Ying, Yiming; Learning with Support Vector Machines, Morgan and Claypool, 2011 ISBN 978-1-60845-616-1
+Ben-Hur, Asa; Horn, David; Siegelmann, Hava; and Vapnik, Vladimir; "Support vector clustering" (2001) Journal of Machine Learning Research, 2: 125–137
+A robust hidden semi-Markov model with application to aCGH data processing [1]
+External links
+libsvm, LIBSVM is a popular library of SVM learners
+liblinear is a library for large linear classification including some SVMs
+SVM light is a collection of software tools for learning and classification using SVM
+SVMJS live demo is a GUI demo for JavaScript implementation of SVMs
+Authority control Edit this at Wikidata
+BNF: cb16627142b (data) GND: 4505517-8 LCCN: sh2008009003
+Categories: Support vector machinesClassification algorithmsStatistical classification
+Navigation menu
+Not logged inTalkContributionsCreate accountLog inArticleTalkReadEditView historySearch
+Search Wikipedia
+Main page
+Contents
+Featured content
+Current events
+Random article
+Donate to Wikipedia
+Wikipedia store
+Interaction
+Help
+About Wikipedia
+Community portal
+Recent changes
+Contact page
+Tools
+What links here
+Related changes
+Upload file
+Special pages
+Permanent link
+Page information
+Wikidata item
+Cite this page
+Print/export
+Create a book
+Download as PDF
+Printable version
+
+Languages
+العربية
+Deutsch
+Español
+Français
+한국어
+Italiano
+Русский
+Tiếng Việt
+中文
+19 more
+Edit links
+This page was last edited on 20 April 2019, at 01:47 (UTC).
+Text is available under the Creative Commons Attribution-ShareAlike License; additional terms may apply. By using this site, you agree to the Terms of Use and Privacy Policy. Wikipedia® is a registered trademark of the Wikimedia Foundation, Inc., a non-profit organization.
+Privacy policyAbout WikipediaDisclaimersContact WikipediaDevelopersCookie statementMobile viewWikimedia Foundation Powered by MediaWiki
+
+
+Confluent
+Product
+Cloud
+Developers
+Blog
+Docs
+Download
+Getting Started
+Install and Upgrade
+Build Applications
+KSQL and Kafka Streams
+Integrate External Systems to Kafka
+Schema Management
+Security
+Confluent Cloud
+Administer
+Auto Data Balancing
+Configuration Options for the rebalancer tool
+Configuration Reference
+Dynamic Configs
+Configure Multi-Node Environment
+Confluent Metrics Reporter
+Docker Image Reference
+Confluent REST Proxy
+Multi-Datacenter Replication
+Kafka Operations
+Running Kafka in Production
+Post Deployment
+Auto Data Balancing
+Configuration Options for the rebalancer tool
+Monitoring Kafka
+Confluent Metrics Reporter
+kafkacat Utility
+Docker Operations
+Post Deployment
+ZooKeeper Operations
+Streams Operations
+KSQL Operations
+Monitor and Manage
+Resources
+Release Notes
+API and Javadocs
+Docs  Administer »
+Auto Data Balancing
+The confluent-rebalancer tool balances data so that the number of leaders and disk usage are even across brokers and racks on a per topic and cluster level while minimising data movement. It also integrates closely with the replication quotas feature in Apache Kafka® to dynamically throttle data balancing traffic.
+
+The tool is part of Confluent Platform and can also be installed on its own via the confluent-rebalancer package.
+
+Requirements
+In order to compute the rebalance plan, the tool relies on metrics collected from the Apache Kafka® cluster. This data is published by the Confluent Metrics Reporter to a configurable Kafka topic (_confluent-metrics by default) in a configurable Kafka cluster.
+
+To enable it, please follow the Confluent Metrics Reporter installation instructions.
+
+Quickstart
+Start a Kafka cluster
+First, startup a ZooKeeper server. In this guide, we are assuming services will run on localhost.
+
+# Start ZooKeeper.  Run this command in its own terminal.
+./bin/zookeeper-server-start ./etc/kafka/zookeeper.properties
+Copy
+Tip
+
+These instructions assume you are installing Confluent Platform by using ZIP or TAR archives. For more information, see On-Premises Deployments.
+
+Copy the broker configuration file to a temporary location, enable the metrics reporter and duplicate the config for additional brokers.
+
+# Copy the config files to /tmp
+cp ./etc/kafka/server.properties /tmp/server0.properties
+
+# Add metrics reporter configs (alternatively, we could uncomment the configs)
+echo "" >> /tmp/server0.properties
+echo "metric.reporters=io.confluent.metrics.reporter.ConfluentMetricsReporter" >> /tmp/server0.properties
+echo "confluent.metrics.reporter.bootstrap.servers=localhost:9092" >> /tmp/server0.properties
+echo "confluent.metrics.reporter.topic.replicas=1" >> /tmp/server0.properties
+
+# properties for broker.id=1
+cp /tmp/server0.properties /tmp/server1.properties
+sed -i '' -e "s/broker.id=0/broker.id=1/g" /tmp/server1.properties
+sed -i '' -e "s/9092/9082/g" /tmp/server1.properties
+sed -i '' -e "s/#listen/listen/g" /tmp/server1.properties
+sed -i '' -e "s/kafka-logs/kafka-logs-1/g" /tmp/server1.properties
+
+# properties for broker.id=2
+cp /tmp/server0.properties /tmp/server2.properties
+sed -i '' -e "s/broker.id=0/broker.id=2/g" /tmp/server2.properties
+sed -i '' -e "s/9092/9072/g" /tmp/server2.properties
+sed -i '' -e "s/#listen/listen/g" /tmp/server2.properties
+sed -i '' -e "s/kafka-logs/kafka-logs-2/g" /tmp/server2.properties
+
+# properties for broker.id=3
+cp /tmp/server0.properties /tmp/server3.properties
+sed -i '' -e "s/broker.id=0/broker.id=3/g" /tmp/server3.properties
+sed -i '' -e "s/9092/9062/g" /tmp/server3.properties
+sed -i '' -e "s/#listen/listen/g" /tmp/server3.properties
+sed -i '' -e "s/kafka-logs/kafka-logs-3/g" /tmp/server3.properties
+Copy
+Next, start the Kafka brokers.
+
+# Start Kafka.  Run these commands in a separate terminal.
+./bin/kafka-server-start /tmp/server0.properties &
+./bin/kafka-server-start /tmp/server1.properties &
+./bin/kafka-server-start /tmp/server2.properties &
+./bin/kafka-server-start /tmp/server3.properties &
+Copy
+For complete details on getting these services up and running see the quickstart instructions for Confluent Platform.
+
+Create topics and produce data
+First let's create a couple of topics, each with 4 partitions and replication factor of 2. We intentionally create an unbalanced assignment.
+
+./bin/kafka-topics --create --topic topic-a --replica-assignment 0:1,0:1,0:1,0:1 --zookeeper localhost:2181
+./bin/kafka-topics --create --topic topic-b --replica-assignment 1:0,2:1,1:2,2:1 --zookeeper localhost:2181
+Copy
+Let's see how they look.
+
+./bin/kafka-topics --describe --topic topic-a --zookeeper localhost:2181
+
+Topic:topic-a        PartitionCount:4        ReplicationFactor:2     Configs:
+   Topic: topic-a    Partition: 0    Leader: 0       Replicas: 0,1   Isr: 0,1
+   Topic: topic-a    Partition: 1    Leader: 0       Replicas: 0,1   Isr: 0,1
+   Topic: topic-a    Partition: 2    Leader: 0       Replicas: 0,1   Isr: 0,1
+   Topic: topic-a    Partition: 3    Leader: 0       Replicas: 0,1   Isr: 0,1
+
+./bin/kafka-topics --describe --topic topic-b --zookeeper localhost:2181
+
+Topic:topic-b        PartitionCount:4        ReplicationFactor:2     Configs:
+  Topic: topic-b     Partition: 0    Leader: 1       Replicas: 1,0   Isr: 1,0
+  Topic: topic-b     Partition: 1    Leader: 2       Replicas: 2,1   Isr: 2,1
+  Topic: topic-b     Partition: 2    Leader: 1       Replicas: 1,2   Isr: 1,2
+  Topic: topic-b     Partition: 3    Leader: 2       Replicas: 2,1   Isr: 2,1
+Copy
+We'll now produce some data.
+
+./bin/kafka-producer-perf-test --topic topic-a --num-records 200000 --record-size 1000 --throughput 10000000 --producer-props bootstrap.servers=localhost:9092
+./bin/kafka-producer-perf-test --topic topic-b --num-records 800000 --record-size 1000 --throughput 10000000 --producer-props bootstrap.servers=localhost:9092
+Copy
+And finally we'll force the creation of the offsets topic by running a consumer.
+
+./bin/kafka-consumer-perf-test --topic topic-a --broker-list localhost:9092 --messages 10
+Copy
+Execute the rebalancer
+Before we start, it's worth mentioning that if you run ./bin/confluent-rebalancer with no arguments, it will output a list of supported commands along with a description.
+
+Let's start with the execute command. We specify the connection string for the ZooKeeper ensemble (with optional chroot), the bootstrap servers for Kafka cluster containing the metrics topic and the maximum bandwidth (in bytes per second) allocated to moving replicas. The verbose flag includes per broker stats in the CLI output, which is useful unless the number of brokers is very large.
+
+./bin/confluent-rebalancer execute --zookeeper localhost:2181 --metrics-bootstrap-server localhost:9092 --throttle 10000000 --verbose
+Copy
+You will be presented with a rebalancing plan, which will be slightly different depending on whether the Kafka brokers are configured to use a single log directory (like in our example) or multiple log directories. In the former case, the rebalancer will ensure that the volume containing the log directory will have at at least the specified percentage of free space during and after the rebalance (with 20% as default). We intend to expand this feature to support multiple log directories in a future release.
+
+Computing the rebalance plan (this may take a while) ...
+You are about to move 17 replica(s) for 14 partitions to 4 broker(s) with total size 827.2 MB.
+The preferred leader for 14 partition(s) will be changed.
+In total, the assignment for 15 partitions will be changed.
+The minimum free volume space is set to 20.0%.
+
+The following brokers will have less than 40% of free volume space during the rebalance:
+      Broker     Current Size (MB)  Size During Rebalance (MB)   Free % During Rebalance      Size After Rebalance (MB)    Free % After Rebalance
+      0          413.6              620.4                        30.1                         519.6                        30.5
+      2          620.4              723.8                        30.1                         520.8                        30.5
+      3          0                  517                          30.1                         520.8                        30.5
+      1          1,034              1,034                        30.1                         519.6                        30.5
+
+Min/max stats for brokers (before -> after):
+      Type  Leader Count                 Replica Count                Size (MB)
+      Min   12 (id: 3) -> 17 (id: 0)     37 (id: 3) -> 43 (id: 3)     0 (id: 3) -> 517 (id: 1)
+      Max   21 (id: 0) -> 17 (id: 0)     51 (id: 1) -> 45 (id: 0)     1,034 (id: 1) -> 517 (id: 3)
+No racks are defined.
+
+Broker stats (before -> after):
+  Broker     Leader Count    Replica Count   Size (MB)            Free Space (%)
+      0          21 -> 17        48 -> 45        413.6 -> 517       30.5 -> 30.5
+      1          20 -> 17        51 -> 44        1,034 -> 517       30.5 -> 30.5
+      2          15 -> 17        40 -> 44        620.4 -> 517       30.5 -> 30.5
+      3          12 -> 17        37 -> 43        0 -> 517           30.5 -> 30.5
+
+Would you like to continue? (y/n):
+Copy
+Because we are running all brokers in the same volume, the free space numbers don't change after the rebalance. If multiple log directories are configured, it's worth paying close attention to the additional disk space requirements during and after the rebalance to ensure that it won't cause a broker to run out of disk space.
+
+In addition, the min/max stats provide a quick summary of the data balance improvement after the rebalance completes. The goal should be for the min and max values to be closer to each other after the rebalance. In this case, we are able to achieve near optimal balance so the numbers are virtually identical.
+
+If you proceed, you will then see the following (don't ignore the warning!):
+
+Rebalance started, its status can be checked via the status command.
+
+Warning: You must run the status or finish command periodically, until the rebalance completes, to ensure the throttle is removed. You can also alter the throttle by re-running the execute command passing a new value.
+Copy
+At this point, the tool will exit and the rebalance will happen in the background (driven by the Kafka Controller).
+
+Check status and finish
+Let's check the status of the rebalance.
+
+./bin/confluent-rebalancer status --zookeeper localhost:2181
+
+Partitions being rebalanced:
+        Topic topic-a: 1,2
+        Topic topic-b: 0
+Copy
+Eventually, the rebalance will complete (finish and status are similar, the latter has more concise output and returns a 0 exit status code when the rebalance is finished).
+
+./bin/confluent-rebalancer finish --zookeeper localhost:2181                             ⏎
+
+The rebalance has completed and throttling has been disabled
+Copy
+We can now verify that the replica assignment is now balanced.
+
+./bin/kafka-topics --describe --topic topic-a --zookeeper localhost:2181
+
+Topic:topic-a        PartitionCount:4        ReplicationFactor:2     Configs:
+        Topic: topic-a       Partition: 0    Leader: 3       Replicas: 3,2   Isr: 2,3
+        Topic: topic-a       Partition: 1    Leader: 2       Replicas: 2,3   Isr: 2,3
+        Topic: topic-a       Partition: 2    Leader: 0       Replicas: 1,0   Isr: 0,1
+        Topic: topic-a       Partition: 3    Leader: 0       Replicas: 0,1   Isr: 0,1
+
+./bin/kafka-topics --describe --topic topic-b --zookeeper localhost:2181
+
+Topic:topic-b        PartitionCount:4        ReplicationFactor:2     Configs:
+        Topic: topic-b       Partition: 0    Leader: 3       Replicas: 3,0   Isr: 0,3
+        Topic: topic-b       Partition: 1    Leader: 0       Replicas: 0,3   Isr: 0,3
+        Topic: topic-b       Partition: 2    Leader: 1       Replicas: 1,2   Isr: 1,2
+        Topic: topic-b       Partition: 3    Leader: 2       Replicas: 2,1   Isr: 2,1
+Copy
+Note that the partition sizes are communicated asynchronously (every 15 seconds by default and configurable via the confluent.metrics.reporter.publish.ms config), so there may be a delay before the tool reports the correct information after a rebalance is finished (particularly noticeable when doing local tests such as this).
+
+Leader balance
+If auto.leader.rebalance.enable is disabled on your brokers, run the preferred leader election tool after the rebalance completes. This will ensure that the actual leaders are balanced (not just the preferred leaders).
+
+Decommissioning brokers
+The confluent-rebalancer tool automatically generates a rebalance plan for decommissioning brokers via the --remove-broker-ids option. Note that the cluster will also be balanced in the same execution.
+
+./bin/confluent-rebalancer execute --zookeeper localhost:2181 --metrics-bootstrap-server localhost:9092 --throttle 100000 --remove-broker-ids 1
+
+Computing the rebalance plan (this may take a while) ...
+You are about to move 48 replica(s) for 48 partitions to 3 broker(s) with total size 775.5 MB.
+The preferred leader for 20 partition(s) will be changed.
+In total, the assignment for 49 partitions will be changed.
+
+You have requested all replicas to be moved out of 1 broker(s) with ID(s): 1.
+After the rebalance, these broker(s) will have no replicas.
+
+The following brokers will require more disk space during the rebalance and, in some cases, after the rebalance:
+     Broker     Current (MB)    During Rebalance (MB)  After Rebalance (MB)
+     0          517             775.5                  568.7
+     2          517             775.5                  723.8
+     3          517             775.5                  775.5
+
+Min/max stats for brokers (before -> after):
+     Type  Leader Count                 Replica Count                Size (MB)
+     Min   17 (id: 0) -> 0 (id: 1)      43 (id: 3) -> 0 (id: 1)      517 (id: 2) -> 0 (id: 1)
+     Max   17 (id: 0) -> 23 (id: 0)     45 (id: 0) -> 59 (id: 0)     517 (id: 1) -> 775.5 (id: 3)
+No racks are defined.
+
+Would you like to continue? (y/n):
+Copy
+Given that we have 8 partitions with roughly the same amount of data, it's not possible for the 3 remaining brokers to have the same amount of data. Broker 2 would have 2 partitions after the rebalance and hence less data.
+
+Limiting Bandwidth Usage during Data Migration
+We have used the --throttle option to limit the amount of bandwidth used for replication. It is possible to update the value while a rebalance is in progress by simply rerunning the tool.
+
+./bin/confluent-rebalancer execute --zookeeper localhost:2181 --metrics-bootstrap-server localhost:9092 --throttle 100000
+
+The throttle rate was updated to 100000 bytes/sec.
+A rebalance is currently in progress for:
+        Topic topic-b: 0,1
+Copy
+See the Throttling documentation for more details.
+
+Licensing
+A license was not specified as part of the quick start. If you have a Confluent license, you can specify it using the confluent.license configuration. For more details about licenses, see Managing Confluent Platform Licenses.
+
+Configuration Options
+Configuration Options for the rebalancer tool
+© Copyright 2019, Confluent, Inc. Privacy Policy | Terms & Conditions. Apache, Apache Kafka, Kafka and the Kafka logo are trademarks of the Apache Software Foundation. All other trademarks, servicemarks, and copyrights are the property of their respective owners.
+
+Please report any inaccuracies on this page or suggest an edit.
+
+Rate this page
+
+Last updated on May 09, 2019.
+
+Built with using a provided by .
+Auto Data Balancing
+Requirements
+Quickstart
+Start a Kafka cluster
+Create topics and produce data
+Execute the rebalancer
+Check status and finish
+Leader balance
+Decommissioning brokers
+Limiting Bandwidth Usage during Data Migration
+Licensing
+Configuration Options
+Expand Contentv5.2.1v5.2.0v5.1.2v5.1.1v5.1.0v5.0.2v5.0.1v5.0.0v4.1.3v4.1.2v4.1.1v4.1.0v4.0.3v4.0.2v4.0.1v4.0.0v3.3.3v3.3.2v3.3.1v3.3.0v3.2.4v3.2.2v3.2.1v3.2.0v3.1.2v3.1.1v3.1.0v3.0.1v3.0.0v2.0.1v2.0.0v1.0.1v1.0
+
+
+Confluent
+Product
+Cloud
+Developers
+Blog
+Docs
+Download
+Getting Started
+Install and Upgrade
+Build Applications
+KSQL and Kafka Streams
+Integrate External Systems to Kafka
+Schema Management
+Security
+Security Tutorial
+Encryption with SSL
+Encryption and Authentication with SSL
+Authentication with SASL
+Authorization and ACLs
+Adding Security to a Running Cluster
+Streams Security
+Confluent Security Plugins
+Docker Security
+Prefixes for Configuring Security
+Kafka Connect Security
+Configuring Security for KSQL
+Security Compliance
+Confluent Cloud
+Administer
+Monitor and Manage
+Resources
+Release Notes
+API and Javadocs
+Docs
+Security
+Confluent Platform is the central nervous system for a business, uniting your organization around a Apache Kafka®-based single source of truth. It is frequently used to store mission-critical data, and therefore enabling security features are crucial.
+
+By default, there is no encryption, authentication, or ACLs configured. Any client can communicate to Kafka brokers via the PLAINTEXT port. It is critical that access via this port is restricted to trusted clients only. Network segmentation and/or authorization ACLs can be used to restrict access to trusted IPs in such cases. If neither is used, the cluster is wide open and can be accessed by anyone.
+
+While non-secured clusters are supported, as are a mix of authenticated, unauthenticated, encrypted and non-encrypted clients, it is recommended to secure the components in your Confluent deployment.
+
+To see a working deployment of encryption, authentication, and authorization configured end-to-end across all Confluent Platform components, check out the Confluent Platform demo.
+
+Contents
+
+Security Tutorial
+Encryption with SSL
+Encryption and Authentication with SSL
+Authentication with SASL
+Authorization and ACLs
+Adding Security to a Running Cluster
+Streams Security
+Confluent Security Plugins
+Docker Security
+Prefixes for Configuring Security
+Kafka Connect Security
+Configuring Security for KSQL
+Security Compliance
+© Copyright 2019, Confluent, Inc. Privacy Policy | Terms & Conditions. Apache, Apache Kafka, Kafka and the Kafka logo are trademarks of the Apache Software Foundation. All other trademarks, servicemarks, and copyrights are the property of their respective owners.
+
+Please report any inaccuracies on this page or suggest an edit.
+
+Rate this page
+
+Last updated on May 09, 2019.
+
+Built with using a provided by .
+Expand Contentv5.2.1v5.2.0v5.1.2v5.1.1v5.1.0v5.0.2v5.0.1v5.0.0v4.1.3v4.1.2v4.1.1v4.1.0v4.0.3v4.0.2v4.0.1v4.0.0v3.3.3v3.3.2v3.3.1v3.3.0v3.2.4v3.2.2v3.2.1v3.2.0v3.1.2v3.1.1v3.1.0v3.0.1v3.0.0v2.0.1v2.0.0v1.0.1v1.0
