@@ -37,6 +37,7 @@ public class ZookeeperHaStateImpl implements HaState {
     public ZookeeperHaStateImpl(String serviceName, String zkConnect, String instanceId) {
         this.serviceName = serviceName;
         this.zkConnect = zkConnect;
+        this.state = State.NEW;
 
         if (this.serviceName == null || this.serviceName.isEmpty()) {
             throw new IllegalArgumentException("invalid service name: null or empty");
@@ -44,7 +45,7 @@ public class ZookeeperHaStateImpl implements HaState {
         if (this.zkConnect == null || zkConnect.isEmpty()) {
             throw new IllegalArgumentException("invalid zookeeper connect: null or empty");
         }
-        this.thread = new Thread(() -> {
+        thread = new Thread(() -> {
             RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
             CuratorFramework client =
                     CuratorFrameworkFactory.newClient(zkConnect, SESSION_TIMEOUT_MS, CONNECTION_TIME_MS, retryPolicy);
@@ -76,9 +77,11 @@ public class ZookeeperHaStateImpl implements HaState {
                     }
                 }
             });
+
+            state = State.SLAVE;
             leaderSelector.start();
         }, "Zookeeper HA state service");
-
+        thread.start();
     }
 
     @Override

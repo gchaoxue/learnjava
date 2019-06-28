@@ -7,7 +7,6 @@ public interface HaState {
 
     public enum State {
         NEW,
-        STANDBY,
         SLAVE,
         MASTER,
         STOP

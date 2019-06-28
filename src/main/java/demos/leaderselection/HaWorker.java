@@ -63,8 +63,7 @@ public class HaWorker {
                         localState = newState;
                         break;
                     }
-                    doWork(localState, newState);
-                    localState = newState;
+                    doWork(newState);
                 }
                 LOG.info("worker stopped, current HA state: {}", localState);
                 workerAdaptor.after();
@@ -75,17 +74,20 @@ public class HaWorker {
     }
 
     // workflow control according to statement switching
-    private void doWork(HaState.State localState, HaState.State newState) {
+    private void doWork(HaState.State newState) {
+
         switch (localState) {
             case SLAVE:
                 if (newState == HaState.State.SLAVE) {
                     // still SLAVE, continue slave work
                     workerAdaptor.doOneStepSlave();
+                    localState = newState;
                 }
                 else if (newState == HaState.State.MASTER) {
                     // from SLAVE to MASTER,
                     try {
                         workerAdaptor.becomeMaster();
+                        localState = newState;
                     } catch (HaWorkerException e) {
                         LOG.error("fail to run adaptor.becomeMaster()", e);
                         // stop the worker using the local state control
@@ -101,11 +103,6 @@ public class HaWorker {
                     }
                 }
                 else {
-                    // this is impossible, :)
-                    // todo: how to throw Exceptions from runnable run method?
-//                    throw new HaWorkerException("illegal statement switching: " +
-//                            "from<" + localState + "> to<" + newState + ">");
-//                    Thread.currentThread().interrupt();
                     LOG.error("illegal statement switching: from<{}> to<{}>", localState, newState);
                 }
                 break;
@@ -113,13 +110,9 @@ public class HaWorker {
                 if (newState == HaState.State.MASTER) {
                     // still MASTER, continue master work
                     workerAdaptor.doOneStepMaster();
-                }
-                else if (newState == HaState.State.SLAVE) {
-                    // switching not defined, MASTER should either PAUSE the work or STOP it
-                    LOG.error("illegal statement switching: from<{}> to<{}>", localState, newState);
+                    localState = newState;
                 }
                 else {
-                    // this is impossible, :)
                     LOG.error("illegal statement switching: from<{}> to<{}>", localState, newState);
                 }
                 break;

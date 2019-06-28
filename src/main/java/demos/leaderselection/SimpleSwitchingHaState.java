@@ -48,7 +48,7 @@ public class SimpleSwitchingHaState implements HaState {
         try {
             Thread.sleep(switchInterval);
         } catch (InterruptedException e) {
-            LOG.error(e.getMessage(), e);
+            Thread.currentThread().interrupt();
         }
     }
 
